@@ -64,7 +64,7 @@ public class IoKafkaLogger implements ReadOnlyChannel {
 
     private long flushTimeoutMillis;
 
-    public IoKafkaLogger(Properties properties, String queueTopic, boolean primary, long flushTimeoutMillis, String contextId) {
+    public IoKafkaLogger(Properties properties, String queueTopic, boolean primary, long flushTimeoutMillis, String logMDC) {
         this.queueTopic = queueTopic;
         this.primary = primary;
         this.flushTimeoutMillis = flushTimeoutMillis;
@@ -78,7 +78,7 @@ public class IoKafkaLogger implements ReadOnlyChannel {
         };
         outputLogger = (bytes) -> {
             String now = dateFormat.format(new Date());
-            send(now + " ctx[" + contextId + "] org.jboss.pnc._userlog_.build-log - " + new String(bytes, charset), exceptionHandler);
+            send(now + " [" + logMDC + "] [org.jboss.pnc._userlog_.build-log] " + new String(bytes, charset), exceptionHandler);
         };
     }
 

@@ -34,11 +34,11 @@
 
   <properties>
     <version.io.termd>1.1.4</version.io.termd>
-    <version.undertow>2.0.15.Final</version.undertow>
+    <version.undertow>2.0.9.Final</version.undertow>
     <version.junit>4.12</version.junit>
     <version.org.slf4j>1.7.25</version.org.slf4j>
     <version.commons-cli>1.4</version.commons-cli>
-    <version.jackson>2.5.4</version.jackson>
+    <version.jackson>2.9.7</version.jackson>
 
     <jdk.min.version>1.8</jdk.min.version>
     <maven.min.version>3.2</maven.min.version>

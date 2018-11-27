@@ -49,7 +49,7 @@ public class Main {
         options.addOption("c", true, "Bind path. A URL mapping path that is used as a prefix to the path. eg. domain.com/<bind-path>/socket");
         options.addOption("kp",true, "Path to kafka properties file.");
         options.addOption("pl",true, "List of primary loggers. eg. -pl FILE,KAFKA");
-        options.addOption(null, "logContextId",true, "Log context id.");
+        options.addOption(null, "logMDC",true, "Logging Mapped Diagnostic Context.");
         options.addOption(null, "enableSocketInvoker",true, "Enable Websocket invoker.");
         options.addOption(null, "enableHttpInvoker",true, "Enable http with callback invoker.");
         options.addOption("h", false, "Print this help message.");
@@ -57,15 +57,15 @@ public class Main {
         CommandLineParser parser = new DefaultParser();
         CommandLine cmd = parser.parse( options, args);
 
-        String logContextId = getOption(cmd, "logContextId", null);
-        if (logContextId == null) {
-            logContextId = System.getProperty("logContextId");
+        String logMDC = getOption(cmd, "logMDC", null);
+        if (logMDC == null) {
+            logMDC = System.getProperty("logMDC");
         }
-        if (logContextId == null) {
-            logContextId = System.getenv("logContextId");
+        if (logMDC == null) {
+            logMDC = System.getenv("logMDC");
         }
-        if (logContextId == null) {
-            logContextId = RandomUtils.randString(12);
+        if (logMDC == null) {
+            logMDC = RandomUtils.randString(12);
         }
 
         if (cmd.hasOption("h")) {
@@ -117,7 +117,7 @@ public class Main {
                 kafkaPropertiesPath,
                 primaryLoggers,
                 buildAgentOptions,
-                logContextId);
+                logMDC);
     }
 
     private static String getOption(CommandLine cmd, String opt, String defaultValue) {

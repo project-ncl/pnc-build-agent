@@ -94,9 +94,9 @@ public class BuildAgentServer {
             Optional<Path> kafkaConfig,
             IoLoggerName[] primaryLoggersArr,
             Options options,
-            String logContextId) throws BuildAgentException {
+            String logMDC) throws BuildAgentException {
         this.options = options;
-        init(logPath, kafkaConfig, primaryLoggersArr, logContextId);
+        init(logPath, kafkaConfig, primaryLoggersArr, logMDC);
     }
     /**
      * Blocks the operation until the server is started.
@@ -107,7 +107,7 @@ public class BuildAgentServer {
             Optional<Path> logPath,
             Optional<Path> kafkaConfig,
             IoLoggerName[] primaryLoggersArr,
-            String logContextId) throws BuildAgentException {
+            String logMDC) throws BuildAgentException {
 
         List<IoLoggerName> primaryLoggers = Arrays.asList(primaryLoggersArr);
 
@@ -132,7 +132,7 @@ public class BuildAgentServer {
             String queueTopic = properties.getProperty("pnc.queue_topic", "pnc-logs");
             long flushTimeoutMillis = Long.parseLong(properties.getProperty("pnc.flush_timeout_millis", "10000"));
 
-            sinkChannels.add(new IoKafkaLogger(properties, queueTopic, isPrimary(primaryLoggers, IoLoggerName.KAFKA), flushTimeoutMillis, logContextId));
+            sinkChannels.add(new IoKafkaLogger(properties, queueTopic, isPrimary(primaryLoggers, IoLoggerName.KAFKA), flushTimeoutMillis, logMDC));
         }
 
         try {
