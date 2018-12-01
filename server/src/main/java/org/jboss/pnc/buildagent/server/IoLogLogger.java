@@ -20,9 +20,11 @@ package org.jboss.pnc.buildagent.server;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.Map;
 import java.util.function.Consumer;
 
 /**
@@ -35,8 +37,9 @@ public class IoLogLogger implements ReadOnlyChannel {
     private Charset charset = Charset.defaultCharset();
     private Consumer<byte[]> outputLogger;
 
-    public IoLogLogger() {
+    public IoLogLogger(Map<String, String> logMDC) {
         outputLogger = (bytes) -> {
+            MDC.setContextMap(logMDC);
             processLog.info(new String(bytes, charset));
         };
     }

@@ -27,8 +27,10 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
@@ -83,7 +85,9 @@ public class BuildAgentServer {
                 false
         );
         this.options = options;
-        init(logPath, kafkaConfig, primaryLoggersArr, RandomUtils.randString(8));
+        Map<String, String> mdcMap = new HashMap<>();
+        mdcMap.put("ctx", RandomUtils.randString(8));
+        init(logPath, kafkaConfig, primaryLoggersArr, mdcMap);
     }
 
     /**
@@ -94,7 +98,7 @@ public class BuildAgentServer {
             Optional<Path> kafkaConfig,
             IoLoggerName[] primaryLoggersArr,
             Options options,
-            String logMDC) throws BuildAgentException {
+            Map<String, String> logMDC) throws BuildAgentException {
         this.options = options;
         init(logPath, kafkaConfig, primaryLoggersArr, logMDC);
     }
@@ -107,13 +111,13 @@ public class BuildAgentServer {
             Optional<Path> logPath,
             Optional<Path> kafkaConfig,
             IoLoggerName[] primaryLoggersArr,
-            String logMDC) throws BuildAgentException {
+            Map<String, String> logMDC) throws BuildAgentException {
 
         List<IoLoggerName> primaryLoggers = Arrays.asList(primaryLoggersArr);
 
         if (IoLogLogger.processLog.isInfoEnabled()) {
             log.info("Initializing Logger sink.");
-            sinkChannels.add(new IoLogLogger());
+            sinkChannels.add(new IoLogLogger(logMDC));
         }
 
         if (logPath.isPresent()) {

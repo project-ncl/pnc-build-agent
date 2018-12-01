@@ -26,11 +26,15 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.jboss.pnc.buildagent.common.RandomUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -38,10 +42,14 @@ import java.util.stream.Collectors;
  * @author <a href="mailto:matejonnet@gmail.com">Matej Lazar</a>
  */
 public class Main {
+
+    private static final Logger logger = LoggerFactory.getLogger(Main.class);
+
     private static final String DEFAULT_HOST = "localhost";
     private static final String DEFAULT_PORT = "8080";
 
     public static void main(String[] args) throws ParseException, BuildAgentException, InterruptedException {
+        logger.info("Starting Build Agent.");
         Options options = new Options();
         options.addOption("b", true, "Address to bind. When not specified " + DEFAULT_HOST + " is used as default.");
         options.addOption("p", true, "Port to bind. When not specified " + DEFAULT_PORT + " is used as default.");
@@ -64,8 +72,20 @@ public class Main {
         if (logMDC == null) {
             logMDC = System.getenv("logMDC");
         }
-        if (logMDC == null) {
-            logMDC = RandomUtils.randString(12);
+
+        Optional<Map<String, String>> mdcParamMap;
+        if (logMDC != null && !logMDC.isEmpty()) {
+             mdcParamMap = parseMdc(logMDC);
+        } else {
+            mdcParamMap = Optional.empty();
+        }
+
+        Map<String, String> mdcMap;
+        if (mdcParamMap.isPresent()) {
+            mdcMap = mdcParamMap.get();
+        } else {
+            mdcMap = new HashMap<>();
+            mdcMap.put("ctx", RandomUtils.randString(12));
         }
 
         if (cmd.hasOption("h")) {
@@ -117,7 +137,21 @@ public class Main {
                 kafkaPropertiesPath,
                 primaryLoggers,
                 buildAgentOptions,
-                logMDC);
+                mdcMap);
+    }
+
+    private static Optional<Map<String, String>> parseMdc(String logMDC) {
+        Map<String, String> mdcMap = new HashMap<>();
+        String[] keyVals = logMDC.split(",");
+        for (String keyVal : keyVals) {
+            String[] split = keyVal.split(":");
+            if (split.length != 2) {
+                logger.warn("Invalid logMdc, expected comma-separated list of key value pairs delimited with colon. eg. k1:v1,k2,v2. Found:{}", logMDC);
+                return Optional.empty();
+            }
+            mdcMap.put(split[0], split[1]);
+        }
+        return Optional.of(mdcMap);
     }
 
     private static String getOption(CommandLine cmd, String opt, String defaultValue) {

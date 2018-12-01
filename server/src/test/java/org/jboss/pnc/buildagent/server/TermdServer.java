@@ -24,6 +24,8 @@ import org.slf4j.LoggerFactory;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -63,7 +65,7 @@ public class TermdServer {
             primaryLoggers = new IoLoggerName[] { IoLoggerName.FILE};
         } else {
             logFolder = Optional.empty();
-            primaryLoggers = new IoLoggerName[] { IoLoggerName.LOG};
+            primaryLoggers = new IoLoggerName[0];
         }
         try {
             Options options = new Options(
@@ -73,12 +75,15 @@ public class TermdServer {
                     useSocket,
                     !useSocket
             );
+            Map<String, String> mdcMap = new HashMap<>();
+            mdcMap.put("ctx", RandomUtils.randString(6));
+
             buildAgentServer = new BuildAgentServer(
                     logFolder,
                     Optional.empty(),
                     primaryLoggers,
                     options,
-                    RandomUtils.randString(6));
+                    mdcMap);
             log.info("Server started.");
         } catch (BuildAgentException e) {
             throw new RuntimeException("Cannot start terminal server.", e);

@@ -23,15 +23,16 @@ import org.apache.kafka.clients.producer.Callback;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
+import org.jboss.pnc.buildagent.server.formatter.LogbackFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -64,21 +65,22 @@ public class IoKafkaLogger implements ReadOnlyChannel {
 
     private long flushTimeoutMillis;
 
-    public IoKafkaLogger(Properties properties, String queueTopic, boolean primary, long flushTimeoutMillis, String logMDC) {
+    public IoKafkaLogger(Properties properties, String queueTopic, boolean primary, long flushTimeoutMillis, Map<String, String> logMDC) {
         this.queueTopic = queueTopic;
         this.primary = primary;
         this.flushTimeoutMillis = flushTimeoutMillis;
         kafkaProducer = new KafkaProducer<>(properties);
-
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSZ");
+        LogbackFormatter logbackFormatter = new LogbackFormatter();
 
         Consumer<Exception> exceptionHandler = (e) -> {
             log.error("Error writing log.", e);
             deliveryException.compareAndSet(null, e);
         };
         outputLogger = (bytes) -> {
-            String now = dateFormat.format(new Date());
-            send(now + " [" + logMDC + "] [org.jboss.pnc._userlog_.build-log] " + new String(bytes, charset), exceptionHandler);
+            MDC.setContextMap(logMDC);
+
+            String messageJson = logbackFormatter.format(new String(bytes, charset));
+            send(messageJson, exceptionHandler);
         };
     }
 
@@ -139,5 +141,6 @@ public class IoKafkaLogger implements ReadOnlyChannel {
         log.info("Closing IoKafkaLogger.");
         kafkaProducer.close();
     }
+
 
 }

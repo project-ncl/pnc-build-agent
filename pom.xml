@@ -39,6 +39,7 @@
     <version.org.slf4j>1.7.25</version.org.slf4j>
     <version.commons-cli>1.4</version.commons-cli>
     <version.jackson>2.9.7</version.jackson>
+    <version.logback.contrib>0.1.5</version.logback.contrib>
 
     <jdk.min.version>1.8</jdk.min.version>
     <maven.min.version>3.2</maven.min.version>
@@ -112,6 +113,18 @@
         <groupId>ch.qos.logback</groupId>
         <artifactId>logback-classic</artifactId>
         <version>1.2.3</version>
+      </dependency>
+
+      <dependency>
+        <groupId>ch.qos.logback.contrib</groupId>
+        <artifactId>logback-jackson</artifactId>
+        <version>${version.logback.contrib}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>ch.qos.logback.contrib</groupId>
+        <artifactId>logback-json-classic</artifactId>
+        <version>${version.logback.contrib}</version>
       </dependency>
 
       <dependency>
