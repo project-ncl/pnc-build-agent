@@ -47,14 +47,15 @@ public class HttpInvoker extends HttpServlet {
 
     private final HttpClient httpClient;
 
-    private Md5 stdoutDiggest;
+    private final Md5 stdoutChecksum;
+
 
     public HttpInvoker(Set<ReadOnlyChannel> readOnlyChannels, SessionRegistry sessionRegistry, HttpClient httpClient)
             throws NoSuchAlgorithmException {
         this.readOnlyChannels = readOnlyChannels;
         this.sessionRegistry = sessionRegistry;
         this.httpClient = httpClient;
-        this.stdoutDiggest = new Md5();
+        this.stdoutChecksum = new Md5();
     }
 
     @Override
@@ -102,18 +103,18 @@ public class HttpInvoker extends HttpServlet {
 
     private void handleOutput(CommandSession commandSession, int[] stdOut) {
         byte[] buffer = Arrays.charIntstoBytes(stdOut, StandardCharsets.UTF_8);
-        stdoutDiggest.add(buffer);
+        stdoutChecksum.add(buffer);
         commandSession.handleOutput(buffer);
     }
 
     private void onComplete(CommandSession commandSession, Status newStatus, URL callbackUrl, String callbackMethod) {
         Callback callbackRequest;
-        String digest = stdoutDiggest.digest();
         try {
+            String digest = stdoutChecksum.digest();
             commandSession.close();
             callbackRequest = new Callback(commandSession.getSessionId(), StatusConverter.fromTermdStatus(newStatus), digest);
         } catch (IOException e) {
-            callbackRequest = new Callback(commandSession.getSessionId(), org.jboss.pnc.buildagent.api.Status.FAILED, "Unable to flush stdout: " + e.getMessage(), digest);
+            callbackRequest = new Callback(commandSession.getSessionId(), org.jboss.pnc.buildagent.api.Status.FAILED, "Unable to flush stdout: " + e.getMessage() );
         }
         //notify completion via callback
 

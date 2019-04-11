@@ -155,7 +155,7 @@ public class Term {
     }
 
     private void writeCompletedToReadonlyChannel(Status newStatus) {
-        String completed = "% # Command finished with status: " + newStatus + "\n";
+        String completed = "% # Command finished with status: " + newStatus + "\n"; //TODO remove this
         readOnlyChannels.forEach(ch -> ch.writeOutput(completed.getBytes(StandardCharsets.UTF_8)));
     }
 
