@@ -33,7 +33,7 @@
   </scm>
 
   <properties>
-    <version.io.termd>1.1.8-SNAPSHOT</version.io.termd>
+    <version.io.termd>1.1.8</version.io.termd>
     <version.undertow>2.0.9.Final</version.undertow>
     <version.junit>4.12</version.junit>
     <version.org.slf4j>1.7.25</version.org.slf4j>
