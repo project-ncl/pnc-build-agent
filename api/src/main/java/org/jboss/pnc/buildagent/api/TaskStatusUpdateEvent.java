@@ -18,41 +18,82 @@
 
 package org.jboss.pnc.buildagent.api;
 
-import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.io.Serializable;
 
 /**
  * @author <a href="mailto:matejonnet@gmail.com">Matej Lazar</a>
  */
-@JsonDeserialize(using = TaskStatusUpdateEventDeserializer.class)
+@JsonDeserialize(builder = TaskStatusUpdateEvent.Builder.class)
 public class TaskStatusUpdateEvent implements Serializable {
 
   private static final Logger log = LoggerFactory.getLogger(TaskStatusUpdateEvent.class);
 
   private final String taskId;
-  private final Status oldStatus;
   private final Status newStatus;
+  private final String outputChecksum;
+  private final String message;
+
+  @Deprecated
+  private final Status oldStatus;
+  @Deprecated
   private final String context;
 
+  @Deprecated
+  public TaskStatusUpdateEvent(String taskId, Status oldStatus, Status newStatus, String context, String outputChecksum) {
+    this.taskId = taskId;
+    this.oldStatus = oldStatus;
+    this.newStatus = newStatus;
+    this.context = context;
+    this.outputChecksum = outputChecksum;
+    this.message = "";
+  }
+
+  @Deprecated
   public TaskStatusUpdateEvent(String taskId, Status oldStatus, Status newStatus, String context) {
     this.taskId = taskId;
     this.oldStatus = oldStatus;
     this.newStatus = newStatus;
     this.context = context;
+    this.outputChecksum = "";
+    this.message = "";
+  }
+
+  private TaskStatusUpdateEvent(Builder builder) {
+    taskId = builder.taskId;
+    newStatus = builder.newStatus;
+    outputChecksum = builder.outputChecksum;
+    message = builder.message;
+    oldStatus = builder.oldStatus;
+    context = builder.context;
+  }
+
+  public static Builder newBuilder() {
+    return new Builder();
+  }
+
+  public static Builder newBuilder(TaskStatusUpdateEvent copy) {
+    Builder builder = new Builder();
+    builder.taskId = copy.getTaskId();
+    builder.newStatus = copy.getNewStatus();
+    builder.outputChecksum = copy.getOutputChecksum();
+    builder.message = copy.getMessage();
+    builder.oldStatus = copy.getOldStatus();
+    builder.context = copy.getContext();
+    return builder;
   }
 
   public String getTaskId() {
     return taskId;
   }
 
+  @Deprecated
   public Status getOldStatus() {
     return oldStatus;
   }
@@ -61,8 +102,17 @@ public class TaskStatusUpdateEvent implements Serializable {
     return newStatus;
   }
 
+  @Deprecated
   public String getContext() {
     return context;
+  }
+
+  public String getOutputChecksum() {
+    return outputChecksum;
+  }
+
+  public String getMessage() {
+    return message;
   }
 
   public String toString() {
@@ -75,13 +125,58 @@ public class TaskStatusUpdateEvent implements Serializable {
     return null;
   }
 
-  public static TaskStatusUpdateEvent fromJson(String serialized) throws IOException {
-    ObjectMapper mapper = new ObjectMapper();
-    try {
-      return mapper.readValue(serialized, TaskStatusUpdateEvent.class);
-    } catch (JsonParseException | JsonMappingException e) {
-      log.error("Cannot deserialize object from json", e);
-      throw e;
+  @JsonPOJOBuilder(withPrefix = "")
+  public static final class Builder {
+
+    private String taskId;
+
+    private Status newStatus;
+
+    private String outputChecksum;
+
+    private String message;
+
+    private Status oldStatus;
+
+    private String context;
+
+    private Builder() {
+    }
+
+    public Builder taskId(String taskId) {
+      this.taskId = taskId;
+      return this;
+    }
+
+    public Builder newStatus(Status newStatus) {
+      this.newStatus = newStatus;
+      return this;
+    }
+
+    public Builder outputChecksum(String outputChecksum) {
+      this.outputChecksum = outputChecksum;
+      return this;
+    }
+
+    public Builder message(String message) {
+      this.message = message;
+      return this;
+    }
+
+    @Deprecated
+    public Builder oldStatus(Status oldStatus) {
+      this.oldStatus = oldStatus;
+      return this;
+    }
+
+    @Deprecated
+    public Builder context(String context) {
+      this.context = context;
+      return this;
+    }
+
+    public TaskStatusUpdateEvent build() {
+      return new TaskStatusUpdateEvent(this);
     }
   }
 

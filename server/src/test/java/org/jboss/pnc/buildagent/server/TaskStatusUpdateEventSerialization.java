@@ -18,6 +18,7 @@
 
 package org.jboss.pnc.buildagent.server;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jboss.pnc.buildagent.api.Status;
 import org.jboss.pnc.buildagent.api.TaskStatusUpdateEvent;
 import org.junit.Assert;
@@ -43,7 +44,8 @@ public class TaskStatusUpdateEventSerialization {
 
         String serialized = taskStatusUpdateEvent.toString();
         log.info("Serialized : {}", serialized);
-        TaskStatusUpdateEvent deserializedTaskStatusUpdateEvent = TaskStatusUpdateEvent.fromJson(serialized);
+        ObjectMapper mapper = new ObjectMapper();
+        TaskStatusUpdateEvent deserializedTaskStatusUpdateEvent = mapper.readValue(serialized, TaskStatusUpdateEvent.class);
 
         Assert.assertEquals(taskId, deserializedTaskStatusUpdateEvent.getTaskId());
     }

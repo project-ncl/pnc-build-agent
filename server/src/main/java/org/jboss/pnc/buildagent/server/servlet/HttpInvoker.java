@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.termd.core.pty.PtyMaster;
 import io.termd.core.pty.Status;
-import org.jboss.pnc.buildagent.api.httpinvoke.Callback;
+import org.jboss.pnc.buildagent.api.TaskStatusUpdateEvent;
 import org.jboss.pnc.buildagent.api.httpinvoke.Cancel;
 import org.jboss.pnc.buildagent.api.httpinvoke.InvokeRequest;
 import org.jboss.pnc.buildagent.api.httpinvoke.InvokeResponse;
@@ -108,19 +108,25 @@ public class HttpInvoker extends HttpServlet {
     }
 
     private void onComplete(CommandSession commandSession, Status newStatus, URL callbackUrl, String callbackMethod) {
-        Callback callbackRequest;
+        TaskStatusUpdateEvent.Builder updateEventBuilder = TaskStatusUpdateEvent.newBuilder();
         try {
             String digest = stdoutChecksum.digest();
             commandSession.close();
-            callbackRequest = new Callback(commandSession.getSessionId(), StatusConverter.fromTermdStatus(newStatus), digest);
+            updateEventBuilder
+                    .taskId(commandSession.getSessionId())
+                    .newStatus(StatusConverter.fromTermdStatus(newStatus))
+                    .outputChecksum(digest);
         } catch (IOException e) {
-            callbackRequest = new Callback(commandSession.getSessionId(), org.jboss.pnc.buildagent.api.Status.FAILED, "Unable to flush stdout: " + e.getMessage() );
+            updateEventBuilder
+                    .taskId(commandSession.getSessionId())
+                    .newStatus(org.jboss.pnc.buildagent.api.Status.FAILED)
+                    .message("Unable to flush stdout: " + e.getMessage());
         }
         //notify completion via callback
 
         CompletableFuture<HttpClient.Response> responseFuture = new CompletableFuture<>();
         try {
-            String data = objectMapper.writeValueAsString(callbackRequest);
+            String data = objectMapper.writeValueAsString(updateEventBuilder.build());
             httpClient.invoke(callbackUrl.toURI(), callbackMethod, data, responseFuture);
         } catch (JsonProcessingException e) {
             logger.error("Cannot serialize invoke object.", e);

@@ -2,7 +2,7 @@ package org.jboss.pnc.buildagent.server.httpinvoker;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jboss.pnc.buildagent.api.Status;
-import org.jboss.pnc.buildagent.api.httpinvoke.Callback;
+import org.jboss.pnc.buildagent.api.TaskStatusUpdateEvent;
 import org.jboss.pnc.buildagent.client.BuildAgentClientException;
 import org.jboss.pnc.buildagent.client.BuildAgentHttpClient;
 import org.jboss.pnc.buildagent.server.TermdServer;
@@ -80,8 +80,8 @@ public class TestCommandExecution {
         String callback = callbackFuture.get(3, TimeUnit.SECONDS);
         responseConsumers.remove(onResult);
 
-        Callback callbackRequest = objectMapper.readValue(callback, Callback.class);
-        Assert.assertEquals(Status.COMPLETED, callbackRequest.getStatus());
+        TaskStatusUpdateEvent callbackRequest = objectMapper.readValue(callback, TaskStatusUpdateEvent.class);
+        Assert.assertEquals(Status.COMPLETED, callbackRequest.getNewStatus());
     }
 
     @Test
@@ -103,8 +103,8 @@ public class TestCommandExecution {
 
         String callback = callbackFuture.get(3, TimeUnit.SECONDS);
         responseConsumers.remove(onResult);
-        Callback callbackRequest = objectMapper.readValue(callback, Callback.class);
-        Assert.assertEquals(Status.FAILED, callbackRequest.getStatus());
+        TaskStatusUpdateEvent callbackRequest = objectMapper.readValue(callback, TaskStatusUpdateEvent.class);
+        Assert.assertEquals(Status.FAILED, callbackRequest.getNewStatus());
 
     }
 }

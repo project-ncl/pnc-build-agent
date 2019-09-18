@@ -33,12 +33,14 @@ import org.jboss.pnc.buildagent.api.ResponseMode;
 import org.jboss.pnc.buildagent.api.TaskStatusUpdateEvent;
 import org.jboss.pnc.buildagent.common.Arrays;
 import org.jboss.pnc.buildagent.common.function.ThrowingConsumer;
+import org.jboss.pnc.buildagent.common.security.Md5;
 import org.jboss.pnc.buildagent.server.ReadOnlyChannel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -61,6 +63,8 @@ public class Term {
     private boolean activeCommand;
 
     CompleteHandler completeHandle = new CompleteHandler();
+    private Md5 stdoutChecksum;
+
 
     private final Set<ReadOnlyChannel> readOnlyChannels = new CopyOnWriteArraySet<>();
 
@@ -73,6 +77,11 @@ public class Term {
             completeHandle.setStdoutCompletedAndRun();
         };
         webSocketTtyConnection = new WebSocketTtyConnection(executor, onStdOutCompleted);
+        try {
+            stdoutChecksum = new Md5();
+        } catch (NoSuchAlgorithmException e) {
+            log.error("Cannot instantiate new Term.", e);
+        }
         log.debug("Created new Term: {}.", this);
     }
 
@@ -106,12 +115,20 @@ public class Term {
     public Consumer<PtyMaster> onTaskCreated() {
         return (ptyMaster) -> {
             ptyMaster.setChangeHandler((oldStatus, newStatus) -> {
+                String logDigest;
+                if (newStatus.isFinal()) {
+                    writeCompletedToReadonlyChannel(newStatus);
+                    logDigest = stdoutChecksum.digest();
+                } else {
+                    logDigest = "";
+                }
                 notifyStatusUpdated(
                         new TaskStatusUpdateEvent(
                                 "" + ptyMaster.getId(),
                                 StatusConverter.fromTermdStatus(oldStatus),
                                 StatusConverter.fromTermdStatus(newStatus),
-                                context)
+                                context,
+                                logDigest)
                 );
             });
         };
@@ -121,7 +138,6 @@ public class Term {
         if (event.getNewStatus().isFinal()) {
             activeCommand = false;
             log.debug("Command [context:{} taskId:{}] execution completed with status {}.", event.getContext(), event.getTaskId(), event.getNewStatus());
-            writeCompletedToReadonlyChannel(StatusConverter.toTermdStatus(event.getNewStatus()));
 
             try {
                 readOnlyChannels.stream()
@@ -131,7 +147,6 @@ public class Term {
                 log.error("Cannot flush primary RO channel.", e);
                 event = new TaskStatusUpdateEvent(event.getTaskId(),event.getOldStatus(), org.jboss.pnc.buildagent.api.Status.FAILED, event.getContext());
             }
-
             completeHandle.setCompletionEventAndRun(event);
         } else {
             log.debug("Setting command active flag [context:{} taskId:{}] Notifying status {}.", event.getContext(), event.getTaskId(), event.getNewStatus());
@@ -156,7 +171,7 @@ public class Term {
 
     private void writeCompletedToReadonlyChannel(Status newStatus) {
         String completed = "% # Command finished with status: " + newStatus + "\n"; //TODO remove this
-        readOnlyChannels.forEach(ch -> ch.writeOutput(completed.getBytes(StandardCharsets.UTF_8)));
+        writeToChannels(completed.getBytes(StandardCharsets.UTF_8));
     }
 
     private void destroyIfInactiveAndDisconnected() {
@@ -238,16 +253,25 @@ public class Term {
     }
 
     private void onStdIn(String stdIn) {
-        for (ReadOnlyChannel ch : readOnlyChannels) {
-            ch.writeOutput(stdIn.getBytes());
-        }
+        byte[] bytes = stdIn.getBytes();
+        writeToChannels(bytes);
     }
 
     private void onStdOut(int[] stdOut) {
+        byte[] buffer = Arrays.charIntstoBytes(stdOut, StandardCharsets.UTF_8);
+        writeToChannels(buffer);
+    }
+
+    private void writeToChannels(byte[] bytes) {
+        stdoutChecksum.add(bytes);
+        if (log.isTraceEnabled()) {
+            log.trace("Writing data: {}", new String(bytes, StandardCharsets.UTF_8));
+        }
         for (ReadOnlyChannel readOnlyChannel : readOnlyChannels) {
-            byte[] buffer = Arrays.charIntstoBytes(stdOut, StandardCharsets.UTF_8);
-            log.trace("Writing to chanel {}; stdout: {}", readOnlyChannel, new String(buffer, StandardCharsets.UTF_8));
-            readOnlyChannel.writeOutput(buffer);
+            if (log.isTraceEnabled()) {
+                log.trace("   to chanel {}", readOnlyChannel);
+            }
+            readOnlyChannel.writeOutput(bytes);
         }
     }
 

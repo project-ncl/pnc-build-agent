@@ -141,7 +141,7 @@ public class BuildAgentClient implements Closeable {
                 log.error( "Cannot read JSON string: " + text, e);
             }
             try {
-                TaskStatusUpdateEvent taskStatusUpdateEvent = TaskStatusUpdateEvent.fromJson(jsonObject.get("event").toString());
+                TaskStatusUpdateEvent taskStatusUpdateEvent = mapper.treeToValue(jsonObject.get("event"), TaskStatusUpdateEvent.class);
                 onStatusUpdate.accept(taskStatusUpdateEvent);
             } catch (IOException e) {
                 log.error("Cannot deserialize TaskStatusUpdateEvent.", e);
