@@ -55,13 +55,13 @@ public class IoQueueLogger implements ReadOnlyChannel {
 
     private long flushTimeoutMillis;
 
-    private final QueueProvider queueProvider;
+    private final QueueAdapter queueAdapter;
 
-    public IoQueueLogger(QueueProvider queueProvider, boolean primary, long flushTimeoutMillis, Map<String, String> logMDC)
+    public IoQueueLogger(QueueAdapter queueAdapter, boolean primary, long flushTimeoutMillis, Map<String, String> logMDC)
             throws InstantiationException {
         this.primary = primary;
         this.flushTimeoutMillis = flushTimeoutMillis;
-        this.queueProvider = queueProvider;
+        this.queueAdapter = queueAdapter;
 
         ServiceLoader<LogFormatter> loader = ServiceLoader.load(LogFormatter.class);
         Iterator<LogFormatter> iterator = loader.iterator();
@@ -73,8 +73,9 @@ public class IoQueueLogger implements ReadOnlyChannel {
         };
         outputLogger = (bytes) -> {
             MDC.setContextMap(logMDC);
-            String messageJson = logFormatter.format(new String(bytes, charset));
-            queueProvider.send(messageJson, exceptionHandler);
+            String message = new String(bytes, charset);
+            String messageJson = logFormatter.format(message);
+            queueAdapter.send(messageJson, exceptionHandler);
         };
     }
 
@@ -100,7 +101,7 @@ public class IoQueueLogger implements ReadOnlyChannel {
         }
         ExecutorService executorService = Executors.newFixedThreadPool(1);
 
-        Future<?> future = executorService.submit(() -> queueProvider.flush());
+        Future<?> future = executorService.submit(() -> queueAdapter.flush());
 
         try {
             future.get(flushTimeoutMillis, TimeUnit.MILLISECONDS);
@@ -121,12 +122,12 @@ public class IoQueueLogger implements ReadOnlyChannel {
     }
 
     public void close(Duration duration) throws IOException {
-        queueProvider.close(duration);
+        queueAdapter.close(duration);
     }
 
     public void close() throws IOException {
         log.info("Closing IoQueueLogger.");
-        queueProvider.close();
+        queueAdapter.close();
     }
 
 

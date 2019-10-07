@@ -6,7 +6,7 @@ import java.util.function.Consumer;
 /**
  * @author <a href="mailto:matejonnet@gmail.com">Matej Lazar</a>
  */
-public interface QueueProvider {
+public interface QueueAdapter {
 
     void flush();
 

@@ -13,16 +13,16 @@ import java.util.function.Consumer;
 /**
  * @author <a href="mailto:matejonnet@gmail.com">Matej Lazar</a>
  */
-public class KafkaQueueProvider implements QueueProvider {
+public class KafkaQueueAdapter implements QueueAdapter {
 
-    private static final Logger log = LoggerFactory.getLogger(KafkaQueueProvider.class);
+    private static final Logger log = LoggerFactory.getLogger(KafkaQueueAdapter.class);
 
     private final KafkaProducer kafkaProducer;
     private final String queueTopic;
 
-    public KafkaQueueProvider(Properties kafkaProperties, String queueTopic) {
+    public KafkaQueueAdapter(Properties kafkaProperties, String queueTopic) {
         this.queueTopic = queueTopic;
-        this.kafkaProducer = new KafkaProducer<>(kafkaProperties);
+        kafkaProducer = new KafkaProducer<>(kafkaProperties);
     }
 
     @Override
