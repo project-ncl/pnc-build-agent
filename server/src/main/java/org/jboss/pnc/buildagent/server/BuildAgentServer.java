@@ -94,7 +94,7 @@ public class BuildAgentServer {
             long flushTimeoutMillis = Long.parseLong(properties.getProperty("pnc.flush_timeout_millis", "10000"));
 
             try {
-                sinkChannels.add(new IoKafkaLogger(properties, queueTopic, isPrimary(primaryLoggers, IoLoggerName.KAFKA), flushTimeoutMillis, logMDC));
+                sinkChannels.add(new IoQueueLogger(properties, queueTopic, isPrimary(primaryLoggers, IoLoggerName.KAFKA), flushTimeoutMillis, logMDC));
             } catch (InstantiationException e) {
                 throw new BuildAgentException("Cannot initialize Kafka logger.", e);
             }

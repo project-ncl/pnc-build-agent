@@ -18,10 +18,6 @@
 
 package org.jboss.pnc.buildagent.server;
 
-import org.apache.kafka.clients.producer.Callback;
-import org.apache.kafka.clients.producer.KafkaProducer;
-import org.apache.kafka.clients.producer.ProducerRecord;
-import org.apache.kafka.clients.producer.RecordMetadata;
 import org.jboss.pnc.buildagent.api.logging.LogFormatter;
 import org.jboss.pnc.buildagent.server.logging.formatters.jboss.JBossFormatter;
 import org.slf4j.Logger;
@@ -30,9 +26,9 @@ import org.slf4j.MDC;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.time.Duration;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Properties;
 import java.util.ServiceLoader;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -46,14 +42,9 @@ import java.util.function.Consumer;
 /**
  * @author <a href="mailto:matejonnet@gmail.opecom">Matej Lazar</a>
  */
-public class IoKafkaLogger implements ReadOnlyChannel {
+public class IoQueueLogger implements ReadOnlyChannel {
 
-    static final Logger processLog = LoggerFactory.getLogger("org.jboss.pnc._userlog_.build-log");
-
-    private final String queueTopic;
-    private final KafkaProducer kafkaProducer;
-
-    private static final Logger log = LoggerFactory.getLogger(IoKafkaLogger.class);
+    private static final Logger log = LoggerFactory.getLogger(IoQueueLogger.class);
     private Charset charset = Charset.defaultCharset();
 
     private Consumer<byte[]> outputLogger;
@@ -64,12 +55,13 @@ public class IoKafkaLogger implements ReadOnlyChannel {
 
     private long flushTimeoutMillis;
 
-    public IoKafkaLogger(Properties properties, String queueTopic, boolean primary, long flushTimeoutMillis, Map<String, String> logMDC)
+    private final QueueProvider queueProvider;
+
+    public IoQueueLogger(QueueProvider queueProvider, boolean primary, long flushTimeoutMillis, Map<String, String> logMDC)
             throws InstantiationException {
-        this.queueTopic = queueTopic;
         this.primary = primary;
         this.flushTimeoutMillis = flushTimeoutMillis;
-        kafkaProducer = new KafkaProducer<>(properties);
+        this.queueProvider = queueProvider;
 
         ServiceLoader<LogFormatter> loader = ServiceLoader.load(LogFormatter.class);
         Iterator<LogFormatter> iterator = loader.iterator();
@@ -82,7 +74,7 @@ public class IoKafkaLogger implements ReadOnlyChannel {
         outputLogger = (bytes) -> {
             MDC.setContextMap(logMDC);
             String messageJson = logFormatter.format(new String(bytes, charset));
-            send(messageJson, exceptionHandler);
+            queueProvider.send(messageJson, exceptionHandler);
         };
     }
 
@@ -108,7 +100,7 @@ public class IoKafkaLogger implements ReadOnlyChannel {
         }
         ExecutorService executorService = Executors.newFixedThreadPool(1);
 
-        Future<?> future = executorService.submit(() -> kafkaProducer.flush());
+        Future<?> future = executorService.submit(() -> queueProvider.flush());
 
         try {
             future.get(flushTimeoutMillis, TimeUnit.MILLISECONDS);
@@ -128,34 +120,13 @@ public class IoKafkaLogger implements ReadOnlyChannel {
         return primary;
     }
 
-    private void send(String message, Consumer<Exception> exceptionHandler) {
-        ProducerRecord<String, String> producerRecord = new ProducerRecord<>(queueTopic, message);
-            Callback callback = (metadata, exception) -> {
-            if (exception != null) {
-                exceptionHandler.accept(exception);
-            } else {
-                log.trace("Message sent to Kafka. Partition:{}, timestamp {}.", metadata.partition(), metadata.timestamp());
-            }
-        };
-        kafkaProducer.send(producerRecord, callback);
-    }
-
-    /**
-     * Blocking send
-     */
-    private void send(String message, long timeoutMillis) throws TimeoutException, ExecutionException, InterruptedException {
-        ProducerRecord<String, String> producerRecord = new ProducerRecord<>(queueTopic, message);
-        Future<RecordMetadata> future = kafkaProducer.send(producerRecord);
-        future.get(timeoutMillis, TimeUnit.MILLISECONDS);
-    }
-
-    public void close(long timeout, TimeUnit timeUnit) throws IOException {
-        kafkaProducer.close(timeout, timeUnit);
+    public void close(Duration duration) throws IOException {
+        queueProvider.close(duration);
     }
 
     public void close() throws IOException {
-        log.info("Closing IoKafkaLogger.");
-        kafkaProducer.close();
+        log.info("Closing IoQueueLogger.");
+        queueProvider.close();
     }
 
 
