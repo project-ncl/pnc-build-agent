@@ -22,7 +22,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jboss.pnc.buildagent.api.Status;
 import org.jboss.pnc.buildagent.api.TaskStatusUpdateEvent;
-import org.jboss.pnc.buildagent.client.BuildAgentClient;
+import org.jboss.pnc.buildagent.client.BuildAgentSocketClient;
 import org.jboss.pnc.buildagent.common.ObjectWrapper;
 import org.jboss.pnc.buildagent.common.Wait;
 import org.junit.AfterClass;
@@ -89,7 +89,7 @@ public class TestGetRunningProcesses {
             }
         };
 
-        BuildAgentClient buildAgentClient = new BuildAgentClient(terminalUrl, Optional.empty(), onStatusUpdate, context);
+        BuildAgentSocketClient buildAgentClient = new BuildAgentSocketClient(terminalUrl, Optional.empty(), onStatusUpdate, context);
         buildAgentClient.executeCommand(TEST_COMMAND);
 
         Supplier<Boolean> evaluationSupplier = () -> resultReceived.get();

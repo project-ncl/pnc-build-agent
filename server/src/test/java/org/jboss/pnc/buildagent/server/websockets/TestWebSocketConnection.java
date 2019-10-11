@@ -21,7 +21,7 @@ package org.jboss.pnc.buildagent.server.websockets;
 import org.jboss.pnc.buildagent.api.ResponseMode;
 import org.jboss.pnc.buildagent.api.Status;
 import org.jboss.pnc.buildagent.api.TaskStatusUpdateEvent;
-import org.jboss.pnc.buildagent.client.BuildAgentClient;
+import org.jboss.pnc.buildagent.client.BuildAgentSocketClient;
 import org.jboss.pnc.buildagent.common.ObjectWrapper;
 import org.jboss.pnc.buildagent.common.Wait;
 import org.jboss.pnc.buildagent.server.MockProcess;
@@ -112,7 +112,7 @@ public class TestWebSocketConnection {
             log.trace("Adding to remote response list [{}].", responseData);
             remoteResponses.add(responseData);
         };
-        BuildAgentClient buildAgentClient = new BuildAgentClient(
+        BuildAgentSocketClient buildAgentClient = new BuildAgentSocketClient(
                 terminalBaseUrl,
                 Optional.of(onResponseData),
                 onStatusUpdate,
@@ -147,7 +147,7 @@ public class TestWebSocketConnection {
             }
         };
 
-        BuildAgentClient buildAgentClient = new BuildAgentClient(terminalBaseUrl, Optional.empty(), onStatusUpdate, context);
+        BuildAgentSocketClient buildAgentClient = new BuildAgentSocketClient(terminalBaseUrl, Optional.empty(), onStatusUpdate, context);
 
         buildAgentClient.executeCommand(getTestCommand(100, 0));
         Wait.forCondition(() -> completed.get(), 10, ChronoUnit.SECONDS, "Command did not complete in given timeout.");
@@ -179,7 +179,7 @@ public class TestWebSocketConnection {
             }
         };
 
-        BuildAgentClient buildAgentClient = new BuildAgentClient(terminalBaseUrl, Optional.empty(), onStatusUpdate, context);
+        BuildAgentSocketClient buildAgentClient = new BuildAgentSocketClient(terminalBaseUrl, Optional.empty(), onStatusUpdate, context);
 
         buildAgentClient.executeCommand(getTestCommand(3, 1));
         buildAgentClient.executeCommand(getTestCommand(3, 0, "2nd-command."));
@@ -207,7 +207,7 @@ public class TestWebSocketConnection {
             }
         };
 
-        BuildAgentClient buildAgentClient = new BuildAgentClient(terminalBaseUrl, Optional.empty(), onStatusUpdate, context, ResponseMode.SILENT, false);
+        BuildAgentSocketClient buildAgentClient = new BuildAgentSocketClient(terminalBaseUrl, Optional.empty(), onStatusUpdate, context, ResponseMode.SILENT, false);
 
         buildAgentClient.executeCommand(getTestCommand(100, 0));
         Wait.forCondition(() -> completed.get(), 10, ChronoUnit.SECONDS, "Command did not complete in given timeout.");
@@ -237,7 +237,7 @@ public class TestWebSocketConnection {
             }
         };
 
-        BuildAgentClient buildAgentClient = new BuildAgentClient(terminalBaseUrl, Optional.empty(), onStatusUpdate, context, ResponseMode.SILENT, false);
+        BuildAgentSocketClient buildAgentClient = new BuildAgentSocketClient(terminalBaseUrl, Optional.empty(), onStatusUpdate, context, ResponseMode.SILENT, false);
 
         buildAgentClient.executeCommand(getTestCommand(3, 1000));
         Wait.forCondition(() -> running.get(), 1, ChronoUnit.SECONDS, "Command did not start in given timeout.");
@@ -259,7 +259,7 @@ public class TestWebSocketConnection {
                 completed.set(true);
             }
         };
-        BuildAgentClient buildAgentClient = new BuildAgentClient(terminalBaseUrl, Optional.empty(), onStatusUpdate, context, ResponseMode.BINARY, false);
+        BuildAgentSocketClient buildAgentClient = new BuildAgentSocketClient(terminalBaseUrl, Optional.empty(), onStatusUpdate, context, ResponseMode.BINARY, false);
         buildAgentClient.executeCommand(getTestCommand(100, 20));
 
         sleep(1000); //wait for async command start
@@ -269,7 +269,7 @@ public class TestWebSocketConnection {
         Consumer<String> onResponse = (message) -> {
             response.append(message);
         };
-        BuildAgentClient buildAgentClientReconnected = new BuildAgentClient(terminalBaseUrl, Optional.of(onResponse), onStatusUpdate, context, ResponseMode.BINARY, false);
+        BuildAgentSocketClient buildAgentClientReconnected = new BuildAgentSocketClient(terminalBaseUrl, Optional.of(onResponse), onStatusUpdate, context, ResponseMode.BINARY, false);
 
         Wait.forCondition(() -> completed.get(), 15, ChronoUnit.SECONDS, "Operation did not complete within given timeout.");
         Wait.forCondition(() -> response.toString().contains("I'm done."), 5, ChronoUnit.SECONDS, "Missing or invalid response: " + response.toString());
@@ -287,14 +287,14 @@ public class TestWebSocketConnection {
                 completed.set(true);
             }
         };
-        BuildAgentClient buildAgentClient = new BuildAgentClient(terminalBaseUrl, Optional.empty(), onStatusUpdate, context, ResponseMode.BINARY, false);
+        BuildAgentSocketClient buildAgentClient = new BuildAgentSocketClient(terminalBaseUrl, Optional.empty(), onStatusUpdate, context, ResponseMode.BINARY, false);
         buildAgentClient.executeCommand(getTestCommand(100, 10));
 
         StringBuilder response = new StringBuilder();
         Consumer<String> onResponse = (message) -> {
             response.append(message);
         };
-        BuildAgentClient buildAgentClientReconnected = new BuildAgentClient(
+        BuildAgentSocketClient buildAgentClientReconnected = new BuildAgentSocketClient(
                 terminalBaseUrl,
                 Optional.of(onResponse),
                 (event) -> {},
@@ -319,14 +319,14 @@ public class TestWebSocketConnection {
                 completed.set(true);
             }
         };
-        BuildAgentClient buildAgentClient = new BuildAgentClient(terminalBaseUrl, Optional.empty(), onStatusUpdate, context, ResponseMode.SILENT, false);
+        BuildAgentSocketClient buildAgentClient = new BuildAgentSocketClient(terminalBaseUrl, Optional.empty(), onStatusUpdate, context, ResponseMode.SILENT, false);
         buildAgentClient.executeCommand(getTestCommand(100, 10));
 
         StringBuilder response = new StringBuilder();
         Consumer<String> onResponse = (message) -> {
             response.append(message);
         };
-        BuildAgentClient buildAgentClientReconnected = new BuildAgentClient(
+        BuildAgentSocketClient buildAgentClientReconnected = new BuildAgentSocketClient(
                 terminalBaseUrl,
                 Optional.of(onResponse),
                 (event) -> {},
@@ -360,9 +360,9 @@ public class TestWebSocketConnection {
         Consumer<String> onSilentResponse = (message) -> {
             silentResponse.append(message);
         };
-        BuildAgentClient buildAgentClientListener = new BuildAgentClient(terminalBaseUrl, Optional.of(onResponse), (event) -> {}, context, ResponseMode.TEXT, true);
+        BuildAgentSocketClient buildAgentClientListener = new BuildAgentSocketClient(terminalBaseUrl, Optional.of(onResponse), (event) -> {}, context, ResponseMode.TEXT, true);
         //connect executing client
-        BuildAgentClient buildAgentClient = new BuildAgentClient(terminalBaseUrl, Optional.of(onSilentResponse), onStatusUpdate, context, ResponseMode.SILENT, false);
+        BuildAgentSocketClient buildAgentClient = new BuildAgentSocketClient(terminalBaseUrl, Optional.of(onSilentResponse), onStatusUpdate, context, ResponseMode.SILENT, false);
         buildAgentClient.executeCommand(getTestCommand(100, 0));
 
         Wait.forCondition(() -> completed.get(), 10, ChronoUnit.SECONDS, "Operation did not complete within given timeout.");
@@ -392,9 +392,9 @@ public class TestWebSocketConnection {
         Consumer<String> onResponse = (message) -> {
             response.append(message);
         };
-        BuildAgentClient buildAgentClientListener = new BuildAgentClient(terminalBaseUrl, Optional.of(onResponse), (event) -> {}, context, ResponseMode.TEXT, true);
+        BuildAgentSocketClient buildAgentClientListener = new BuildAgentSocketClient(terminalBaseUrl, Optional.of(onResponse), (event) -> {}, context, ResponseMode.TEXT, true);
         //connect executing client
-        BuildAgentClient buildAgentClient = new BuildAgentClient(terminalBaseUrl, Optional.empty(), onStatusUpdate, context, ResponseMode.BINARY, false);
+        BuildAgentSocketClient buildAgentClient = new BuildAgentSocketClient(terminalBaseUrl, Optional.empty(), onStatusUpdate, context, ResponseMode.BINARY, false);
         buildAgentClient.executeCommand(getTestCommand(100, 0));
 
         Wait.forCondition(() -> completed.get(), 10, ChronoUnit.SECONDS, "Operation did not complete within given timeout.");

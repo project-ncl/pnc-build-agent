@@ -3,6 +3,7 @@ package org.jboss.pnc.buildagent.server.httpinvoker;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jboss.pnc.buildagent.api.Status;
 import org.jboss.pnc.buildagent.api.TaskStatusUpdateEvent;
+import org.jboss.pnc.buildagent.client.BuildAgentClient;
 import org.jboss.pnc.buildagent.client.BuildAgentClientException;
 import org.jboss.pnc.buildagent.client.BuildAgentHttpClient;
 import org.jboss.pnc.buildagent.server.TermdServer;
@@ -72,8 +73,8 @@ public class TestCommandExecution {
         responseConsumers.add(onResult);
 
         URL callbackUrl = new URL("http://" + HOST +":" + LOCAL_PORT+"/" + CallbackHandler.class.getSimpleName());
-        BuildAgentHttpClient client = new BuildAgentHttpClient(terminalBaseUrl, callbackUrl, "PUT");
-        client.executeCommand(TEST_COMMAND_BASE + "10 0");
+        BuildAgentClient client = new BuildAgentHttpClient(terminalBaseUrl, callbackUrl, "PUT");
+        client.execute(TEST_COMMAND_BASE + "10 0");
 
         Assert.assertNotNull(client.getSessionId());
 
@@ -93,8 +94,8 @@ public class TestCommandExecution {
         responseConsumers.add(onResult);
 
         URL callbackUrl = new URL("http://" + HOST +":" + LOCAL_PORT+"/" + CallbackHandler.class.getSimpleName());
-        BuildAgentHttpClient client = new BuildAgentHttpClient(terminalBaseUrl, callbackUrl, "PUT");
-        client.executeCommand(TEST_COMMAND_BASE + "4 250");
+        BuildAgentClient client = new BuildAgentHttpClient(terminalBaseUrl, callbackUrl, "PUT");
+        client.execute(TEST_COMMAND_BASE + "4 250");
 
         Assert.assertNotNull(client.getSessionId());
 

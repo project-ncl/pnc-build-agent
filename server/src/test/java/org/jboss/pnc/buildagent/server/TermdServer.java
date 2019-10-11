@@ -34,6 +34,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class TermdServer {
 
+    public static final String HOST = "localhost";
+
     private static final AtomicInteger port_pool = new AtomicInteger(8090);
 
     private static BuildAgentServer buildAgentServer;

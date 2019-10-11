@@ -22,6 +22,10 @@ package org.jboss.pnc.buildagent.client;
  * @author <a href="mailto:matejonnet@gmail.com">Matej Lazar</a>
  */
 public class BuildAgentClientException extends Exception {
+    public BuildAgentClientException(String message) {
+        super(message);
+    }
+
     public BuildAgentClientException(String message, Exception e) {
         super(message, e);
     }

@@ -1,7 +1,7 @@
 package org.jboss.pnc.buildagent.server;
 
 import org.jboss.pnc.buildagent.api.TaskStatusUpdateEvent;
-import org.jboss.pnc.buildagent.client.BuildAgentClient;
+import org.jboss.pnc.buildagent.client.BuildAgentSocketClient;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -102,7 +102,7 @@ public class ConcurrentStdInOut {
         Consumer<String> responseConsumer = s -> {
             responses.add(s);
         };
-        BuildAgentClient buildAgentClient = new BuildAgentClient(terminalUrl, Optional.of(responseConsumer), onStatusUpdate, context);
+        BuildAgentSocketClient buildAgentClient = new BuildAgentSocketClient(terminalUrl, Optional.of(responseConsumer), onStatusUpdate, context);
         buildAgentClient.executeCommand(TEST_COMMAND);
 
         String received = queue.poll(5, TimeUnit.SECONDS);

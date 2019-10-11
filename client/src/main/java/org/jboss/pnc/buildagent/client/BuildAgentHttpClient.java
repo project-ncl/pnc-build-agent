@@ -22,9 +22,8 @@ import java.util.concurrent.TimeoutException;
 /**
  * @author <a href="mailto:matejonnet@gmail.com">Matej Lazar</a>
  */
-public class BuildAgentHttpClient {
+public class BuildAgentHttpClient extends BuildAgentClientBase implements BuildAgentClient {
     private final Logger logger = LoggerFactory.getLogger(BuildAgentHttpClient.class);
-    private final HttpClient httpClient;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     private final URL invokerUrl;
@@ -37,6 +36,7 @@ public class BuildAgentHttpClient {
 
     public BuildAgentHttpClient(String termBaseUrl, URL callbackUrl, String callbackMethod)
             throws BuildAgentClientException {
+        super(termBaseUrl);
         this.callbackUrl = callbackUrl;
         this.callbackMethod = callbackMethod;
         try {
@@ -44,16 +44,18 @@ public class BuildAgentHttpClient {
         } catch (MalformedURLException e) {
             throw new BuildAgentClientException("Invalid term url.", e);
         }
-        try {
-            httpClient = new HttpClient();
-        } catch (IOException e) {
-            throw new BuildAgentClientException("Cannot initialize http client.", e);
-        }
     }
 
-    public void executeCommand(String command)
-            throws BuildAgentClientException, InterruptedException, ExecutionException, TimeoutException {
-        InvokeRequest request = new InvokeRequest(command, callbackUrl, callbackMethod);
+    @Override
+    public void execute(Object command) throws BuildAgentClientException {
+        String cmd;
+        if (command instanceof String) {
+            cmd = (String) command;
+        } else {
+            throw new BuildAgentClientException("Http client supports only String commands.");
+        }
+
+        InvokeRequest request = new InvokeRequest(cmd, callbackUrl, callbackMethod);
         CompletableFuture<HttpClient.Response> responseFuture = new CompletableFuture<>();
         try {
             String requestJson = objectMapper.writeValueAsString(request);
@@ -63,7 +65,12 @@ public class BuildAgentHttpClient {
         } catch (URISyntaxException e) {
             throw new BuildAgentClientException("Invalid command execution url.", e);
         }
-        HttpClient.Response response = responseFuture.get(5, TimeUnit.SECONDS); //TODO timeout
+        HttpClient.Response response = null; //TODO timeout
+        try {
+            response = responseFuture.get(5, TimeUnit.SECONDS);
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            throw new BuildAgentClientException("No response form the remote agent.", e);
+        }
         InvokeResponse invokeResponse;
         try {
             invokeResponse = objectMapper.readValue(response.getString(), InvokeResponse.class);
@@ -78,7 +85,8 @@ public class BuildAgentHttpClient {
      * @return true if cancel was successful
      * @throws BuildAgentClientException
      */
-    public boolean cancel() throws BuildAgentClientException {
+    @Override
+    public void cancel() throws BuildAgentClientException {
         Cancel request = new Cancel(sessionId);
         CompletableFuture<HttpClient.Response> responseFuture = new CompletableFuture<>();
         try {
@@ -93,13 +101,20 @@ public class BuildAgentHttpClient {
         }
         try {
             HttpClient.Response response = responseFuture.get(5, TimeUnit.SECONDS);
-            return response.getCode() == 200;
+            if (response.getCode() != 200) {
+                throw new BuildAgentClientException(String.format("Remove invocation failed, received status {}.", response.getCode()));
+            }
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             throw new BuildAgentClientException("Error reading cancel request.", e);
         }
     }
 
+    @Override
     public String getSessionId() {
         return sessionId;
+    }
+
+    @Override
+    public void close() throws IOException {
     }
 }

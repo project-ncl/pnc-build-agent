@@ -22,7 +22,7 @@ import org.jboss.pnc.buildagent.server.TermdServer;
 import org.jboss.pnc.buildagent.api.ResponseMode;
 import org.jboss.pnc.buildagent.api.Status;
 import org.jboss.pnc.buildagent.api.TaskStatusUpdateEvent;
-import org.jboss.pnc.buildagent.client.BuildAgentClient;
+import org.jboss.pnc.buildagent.client.BuildAgentSocketClient;
 import org.jboss.pnc.buildagent.common.ObjectWrapper;
 import org.jboss.pnc.buildagent.common.Wait;
 import org.junit.AfterClass;
@@ -77,7 +77,7 @@ public class TestWebSocketConnectionWithBindPath {
                 completed.set(true);
             }
         };
-        BuildAgentClient buildAgentClient = new BuildAgentClient(terminalBaseUrl, Optional.empty(), onStatusUpdate, context, ResponseMode.BINARY, false);
+        BuildAgentSocketClient buildAgentClient = new BuildAgentSocketClient(terminalBaseUrl, Optional.empty(), onStatusUpdate, context, ResponseMode.BINARY, false);
         buildAgentClient.executeCommand(TEST_COMMAND);
 
         Thread.sleep(1000); //make sure async command execution started
@@ -87,7 +87,7 @@ public class TestWebSocketConnectionWithBindPath {
         Consumer<String> onResponse = (message) -> {
             response.append(message);
         };
-        BuildAgentClient buildAgentClientReconnected = new BuildAgentClient(
+        BuildAgentSocketClient buildAgentClientReconnected = new BuildAgentSocketClient(
                 terminalBaseUrl,
                 Optional.of(onResponse),
                 onStatusUpdate,
@@ -111,7 +111,7 @@ public class TestWebSocketConnectionWithBindPath {
                 completed.set(true);
             }
         };
-        BuildAgentClient buildAgentClient = new BuildAgentClient(terminalBaseUrl, Optional.empty(), onStatusUpdate, context, ResponseMode.BINARY, false);
+        BuildAgentSocketClient buildAgentClient = new BuildAgentSocketClient(terminalBaseUrl, Optional.empty(), onStatusUpdate, context, ResponseMode.BINARY, false);
         buildAgentClient.executeCommand(TEST_COMMAND);
 
         Thread.sleep(1000); //make sure async command execution started
@@ -121,7 +121,7 @@ public class TestWebSocketConnectionWithBindPath {
         Consumer<String> onResponse = (message) -> {
             response.append(message);
         };
-        BuildAgentClient buildAgentClientReconnected = new BuildAgentClient(
+        BuildAgentSocketClient buildAgentClientReconnected = new BuildAgentSocketClient(
                 terminalBaseUrl,
                 Optional.of(onResponse),
                 onStatusUpdate,
