@@ -84,6 +84,7 @@ public class BuildAgentSocketClient extends BuildAgentClientBase implements Buil
             onStatusUpdate.accept(event);
         };
 
+        String wsTermBaseUrl = termBaseUrl.replace("http://", "ws://");
         statusUpdatesEndpoint = connectStatusListenerClient(termBaseUrl, onStatusUpdateInternal);
         commandExecutingEndpoint = connectCommandExecutingClient(termBaseUrl, responseDataConsumer);
     }

@@ -23,5 +23,6 @@ public class LivenessProbeTest {
         TermdServer.startServer(HOST, port, "", true, true);
         Assert.assertTrue(client.isServerAlive());
         TermdServer.stopServer();
+        Assert.assertFalse(client.isServerAlive());
     }
 }
