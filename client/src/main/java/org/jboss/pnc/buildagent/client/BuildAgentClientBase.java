@@ -1,6 +1,7 @@
 package org.jboss.pnc.buildagent.client;
 
 import org.jboss.logging.Logger;
+import org.jboss.pnc.buildagent.common.StringUtils;
 import org.jboss.pnc.buildagent.common.http.HttpClient;
 
 import java.io.IOException;
@@ -21,6 +22,7 @@ public abstract class BuildAgentClientBase {
     protected final URI livenessProbeLocation;
 
     public BuildAgentClientBase(String termBaseUrl) throws BuildAgentClientException {
+        termBaseUrl = StringUtils.stripEndingSlash(termBaseUrl);
         this.livenessProbeLocation = URI.create(termBaseUrl + "/servlet/is-alive");
         try {
             httpClient = new HttpClient();

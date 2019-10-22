@@ -1,0 +1,218 @@
+/**
+ * JBoss, Home of Professional Open Source.
+ * Copyright 2014-2019 Red Hat, Inc., and individual contributors
+ * as indicated by the @author tags.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.jboss.pnc.buildagent.common;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.Charset;
+import java.util.ArrayDeque;
+import java.util.Arrays;
+import java.util.Set;
+import java.util.StringJoiner;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
+
+/**
+ * Created by <a href="mailto:matejonnet@gmail.com">Matej Lazar</a> on 2015-01-01.
+ */
+public class StringUtils {
+
+    /**
+     * Check if the given string is null or contains only whitespace characters.
+     * 
+     * @param string String to check for non-whitespace characters
+     * @return boolean True if the string is null, empty, or contains only whitespace (empty when trimmed).  
+     * Otherwise return false.
+     */
+    public static boolean isEmpty(String string) {
+        if (string == null ) {
+            return true;
+        }
+        return string.trim().isEmpty();
+    }
+
+    public static String toCVS(Set<Integer> buildRecordSetIds) {
+        StringJoiner joiner = new StringJoiner(",");
+        buildRecordSetIds.forEach(el -> joiner.add(el.toString()));
+        return joiner.toString();
+    }
+
+    /**
+     * Remove ending slash if present and return the string without ending slash
+     *
+     * @param string
+     * @return
+     */
+    public static String stripEndingSlash(String string) {
+        if (string == null) {
+            return null;
+        }
+        if (string.endsWith("/")) {
+            string = string.substring(0, string.length() - 1);
+        }
+        return string;
+    }
+
+    /**
+     * Remove ending slash if present and return the string without ending slash
+     *
+     * @param string
+     * @return
+     */
+    public static String stripTrailingSlash(String string) {
+        if (string == null) {
+            return null;
+        }
+        if (string.startsWith("/")) {
+            string = string.substring(1);
+        }
+        return string;
+    }
+
+    /**
+     * Adds ending slash if it is not present.
+     *
+     * @param string
+     * @return
+     */
+    public static String addEndingSlash(String string) {
+        if (string == null) {
+            return null;
+        }
+        if (!string.endsWith("/")) {
+            string += "/";
+        }
+        return string;
+    }
+
+    public static String trim(String string, int maxLength) {
+        if (string == null) {
+            return null;
+        }
+
+        if (string.length() > maxLength) {
+            return string.substring(0, maxLength - 1) + "...";
+        } else {
+            return string;
+        }
+    }
+
+    public static String stripSuffix(String string, String suffix) {
+        if (string == null) {
+            return null;
+        }
+        if (suffix == null) {
+            return string;
+        }
+
+        if (string.endsWith(suffix)) {
+            return string.substring(0, string.length() - suffix.length());
+        } else {
+            return string;
+        }
+    }
+
+    public static String stripProtocol(String url) {
+        if (url == null) {
+            return null;
+        }
+
+        String protocolDivider = "://";
+        int protocolDividerIndex = url.indexOf(protocolDivider);
+
+        if (protocolDividerIndex > -1) {
+            return url.substring(protocolDividerIndex + protocolDivider.length());
+        } else {
+            return url;
+        }
+    }
+
+    public static void readStream(InputStream inputStream, Charset charset, ArrayDeque<String> lines, int maxMessageSize, Consumer<String> droppedLinesConsumer) throws
+            IOException {
+        InputStreamReader inputStreamReader = new InputStreamReader(inputStream, charset);
+        BufferedReader reader=new BufferedReader(inputStreamReader);
+
+        int messageSize = 0;
+        while (true) {
+            String line = reader.readLine();
+            if (line == null) {
+                break;
+            }
+            if (maxMessageSize > -1) {
+                messageSize += line.length();
+                while (messageSize > maxMessageSize) {
+                    String removedLine = lines.removeFirst();
+                    messageSize -= removedLine.length();
+                    droppedLinesConsumer.accept(removedLine);
+                }
+            }
+            lines.add(line);
+        }
+    }
+
+    /**
+     * Parse comma separated string to Integer array.
+     * @return An empty array when the string parameter is empty or null.
+     */
+    public static Integer[] deserializeInt(String string) {
+        if (string == null) {
+            return new Integer[0];
+        }
+        return Arrays.stream(string.split(","))
+                .filter(s -> !s.equals(""))
+                .map(Integer::parseInt).toArray(Integer[]::new);
+    }
+
+    /**
+     * Serialize Integer array to comma separated string.
+     * @return An empty string when the Integer array parameter is empty or null.
+     */
+    public static String serializeInt(Integer[] integers) {
+        if (integers == null) {
+            return "";
+        }
+        return Arrays.stream(integers)
+                .map(i -> Integer.toString(i)).collect(Collectors.joining(","));
+    }
+
+    public static Integer parseInt(String s, int defaultValue) {
+        if (isEmpty(s)) {
+            return defaultValue;
+        }
+        try {
+            return Integer.parseInt(s);
+        } catch (NumberFormatException e) {
+            return defaultValue;
+        }
+    }
+
+    public static String firstCharToLowerCase(String string) {
+        char c[] = string.toCharArray();
+        c[0] = Character.toLowerCase(c[0]);
+        return new String(c);
+    }
+
+    public static String firstCharToUpperCase(String string) {
+        char c[] = string.toCharArray();
+        c[0] = Character.toUpperCase(c[0]);
+        return new String(c);
+    }
+
+}
