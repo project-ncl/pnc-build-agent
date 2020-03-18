@@ -4,6 +4,7 @@ import org.jboss.logging.Logger;
 import org.jboss.pnc.buildagent.common.StringUtils;
 import org.jboss.pnc.buildagent.common.http.HttpClient;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.net.URI;
 import java.util.concurrent.CompletableFuture;
@@ -14,7 +15,7 @@ import java.util.concurrent.TimeoutException;
 /**
  * @author <a href="mailto:matejonnet@gmail.com">Matej Lazar</a>
  */
-public abstract class BuildAgentClientBase {
+public abstract class BuildAgentClientBase implements Closeable {
 
     private final Logger log = Logger.getLogger(BuildAgentClientBase.class);
 
@@ -41,5 +42,10 @@ public abstract class BuildAgentClientBase {
             log.warn("Did not receive liveness probe response.", e);
             return false;
         }
+    }
+
+    @Override
+    public void close() throws IOException {
+        httpClient.close();
     }
 }

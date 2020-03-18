@@ -113,8 +113,4 @@ public class BuildAgentHttpClient extends BuildAgentClientBase implements BuildA
     public String getSessionId() {
         return sessionId;
     }
-
-    @Override
-    public void close() throws IOException {
-    }
 }

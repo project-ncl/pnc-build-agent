@@ -18,6 +18,7 @@ import org.xnio.Options;
 import org.xnio.Xnio;
 import org.xnio.XnioWorker;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.net.URI;
 import java.util.concurrent.CompletableFuture;
@@ -26,7 +27,7 @@ import java.util.function.Function;
 /**
  * @author <a href="mailto:matejonnet@gmail.com">Matej Lazar</a>
  */
-public class HttpClient {
+public class HttpClient implements Closeable {
     private final Logger logger = LoggerFactory.getLogger(HttpClient.class);
 
     private final XnioWorker xnioWorker;
@@ -40,7 +41,7 @@ public class HttpClient {
                 .set(Options.WORKER_IO_THREADS, 8)
                 .set(Options.TCP_NODELAY, true)
                 .set(Options.KEEP_ALIVE, true)
-                .set(Options.WORKER_NAME, "Client");
+                .set(Options.WORKER_NAME, "Build Agent Http Client");
         DEFAULT_OPTIONS = builder.getMap();
     }
 
@@ -63,7 +64,7 @@ public class HttpClient {
     }
 
     public void invoke(URI uri, String requestMethod, String data, CompletableFuture<Response> responseFuture) {
-        logger.debug("Making {} request to the endpoint {}; request data: {}.", requestMethod, uri.toString(), data);
+        logger.trace("Making {} request to the endpoint {}; request data: {}.", requestMethod, uri.toString(), data);
 
         UndertowClient undertowClient = UndertowClient.getInstance();
 
@@ -149,6 +150,11 @@ public class HttpClient {
             responseFuture.complete(response);
             return null;
         });
+    }
+
+    @Override
+    public void close() throws IOException {
+        xnioWorker.shutdown();
     }
 
     public static class Response {

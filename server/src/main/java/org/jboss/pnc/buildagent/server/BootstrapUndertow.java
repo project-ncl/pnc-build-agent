@@ -63,13 +63,12 @@ public class BootstrapUndertow {
 
     private final Logger log = LoggerFactory.getLogger(BootstrapUndertow.class);
 
-
     private Undertow server;
-
     private final ConcurrentHashMap<String, Term> terms = new ConcurrentHashMap<>();
     private final ScheduledExecutorService executor;
     private final Set<ReadOnlyChannel> readOnlyChannels;
     private final Options options;
+    HttpClient httpClient;
 
     public BootstrapUndertow(
             ScheduledExecutorService executor,
@@ -105,7 +104,6 @@ public class BootstrapUndertow {
 
         if (options.isHttpInvokerEnabled()) {
 
-            HttpClient httpClient;
             try {
                 httpClient = new HttpClient();
             } catch (IOException e) {
@@ -152,6 +150,14 @@ public class BootstrapUndertow {
         if (server != null) {
             server.stop();
         }
+        if (httpClient != null) {
+            try {
+                httpClient.close();
+            } catch (IOException e) {
+                log.error("Cannot close http client.", e);
+            }
+        }
+
     }
 
     private void handleWebSocketRequests(HttpServerExchange exchange, String socketPath) throws Exception {

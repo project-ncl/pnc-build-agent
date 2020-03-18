@@ -259,6 +259,7 @@ public class BuildAgentSocketClient extends BuildAgentClientBase implements Buil
     public void close() throws IOException {
         if(closed.compareAndSet(false, true)) {
             try {
+                super.close();
                 commandExecutingEndpoint.close();
                 statusUpdatesEndpoint.close();
             } catch (Exception e) {
