@@ -19,13 +19,16 @@
 package org.jboss.pnc.buildagent.server;
 
 import org.jboss.pnc.buildagent.api.logging.LogFormatter;
+import org.jboss.pnc.buildagent.common.LineConsumer;
 import org.jboss.pnc.buildagent.server.logging.formatters.jboss.JBossFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Iterator;
 import java.util.Map;
@@ -57,8 +60,10 @@ public class IoQueueLogger implements ReadOnlyChannel {
 
     private final QueueAdapter queueAdapter;
 
+    private final LineConsumer lineConsumer;
+
     public IoQueueLogger(QueueAdapter queueAdapter, boolean primary, long flushTimeoutMillis, Map<String, String> logMDC)
-            throws InstantiationException {
+            throws InstantiationException, UnsupportedEncodingException {
         this.primary = primary;
         this.flushTimeoutMillis = flushTimeoutMillis;
         this.queueAdapter = queueAdapter;
@@ -71,11 +76,16 @@ public class IoQueueLogger implements ReadOnlyChannel {
             log.error("Error writing log.", e);
             deliveryException.compareAndSet(null, e);
         };
+
+        Consumer<String> onLine = (line)-> {
+            String messageJson = logFormatter.format(line);
+            queueAdapter.send(messageJson, exceptionHandler);
+        };
+        lineConsumer = new LineConsumer(onLine, StandardCharsets.UTF_8);
+
         outputLogger = (bytes) -> {
             MDC.setContextMap(logMDC);
-            String message = new String(bytes, charset);
-            String messageJson = logFormatter.format(message);
-            queueAdapter.send(messageJson, exceptionHandler);
+            lineConsumer.append(bytes);
         };
     }
 
@@ -95,6 +105,7 @@ public class IoQueueLogger implements ReadOnlyChannel {
 
     @Override
     public void flush() throws IOException {
+        lineConsumer.flush();
         Exception e = deliveryException.get();
         if (e != null) {
             throw new IOException("Some messages were not written.", e);

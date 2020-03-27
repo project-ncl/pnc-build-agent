@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -96,7 +97,7 @@ public class BuildAgentServer {
             try {
                 KafkaQueueAdapter kafkaQueueAdapter = new KafkaQueueAdapter(properties, queueTopic);
                 sinkChannels.add(new IoQueueLogger(kafkaQueueAdapter, isPrimary(primaryLoggers, IoLoggerName.KAFKA), flushTimeoutMillis, logMDC));
-            } catch (InstantiationException e) {
+            } catch (InstantiationException | UnsupportedEncodingException e) {
                 throw new BuildAgentException("Cannot initialize Kafka logger.", e);
             }
         }
