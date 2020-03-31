@@ -21,8 +21,10 @@ public abstract class BuildAgentClientBase implements Closeable {
 
     protected final HttpClient httpClient;
     protected final URI livenessProbeLocation;
+    private final long livenessResponseTimeout;
 
-    public BuildAgentClientBase(String termBaseUrl) throws BuildAgentClientException {
+    public BuildAgentClientBase(String termBaseUrl, long livenessResponseTimeout) throws BuildAgentClientException {
+        this.livenessResponseTimeout = livenessResponseTimeout;
         termBaseUrl = StringUtils.stripEndingSlash(termBaseUrl);
         this.livenessProbeLocation = URI.create(termBaseUrl + "/servlet/is-alive");
         try {
@@ -36,10 +38,11 @@ public abstract class BuildAgentClientBase implements Closeable {
         CompletableFuture<HttpClient.Response> responseFuture = new CompletableFuture<>();
         httpClient.invoke(livenessProbeLocation, "HEAD", "", responseFuture);
         try {
-            HttpClient.Response response = responseFuture.get(5, TimeUnit.SECONDS);
+            HttpClient.Response response = responseFuture.get(livenessResponseTimeout, TimeUnit.MILLISECONDS);
             return response.getCode() == 200;
         } catch (InterruptedException | TimeoutException | ExecutionException e) {
             log.warn("Did not receive liveness probe response.", e);
+            responseFuture.cancel(true);
             return false;
         }
     }

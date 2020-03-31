@@ -61,6 +61,9 @@ public class BuildAgentSocketClient extends BuildAgentClientBase implements Buil
 
     private AtomicBoolean closed = new AtomicBoolean(false);
 
+    /**
+     * @see BuildAgentHttpClient(Optional<Consumer<String>>, Consumer<TaskStatusUpdateEvent>, SocketClientConfiguration )
+     */
     public BuildAgentSocketClient(String termBaseUrl,
                             Optional<Consumer<String>> responseDataConsumer,
                             Consumer<TaskStatusUpdateEvent> onStatusUpdate,
@@ -69,13 +72,17 @@ public class BuildAgentSocketClient extends BuildAgentClientBase implements Buil
         this(termBaseUrl, responseDataConsumer, onStatusUpdate, commandContext, ResponseMode.BINARY, false);
     }
 
+    /**
+     * @see BuildAgentHttpClient(Optional<Consumer<String>>, Consumer<TaskStatusUpdateEvent>, SocketClientConfiguration )
+     */
+    @Deprecated
     public BuildAgentSocketClient(String termBaseUrl,
             Optional<Consumer<String>> responseDataConsumer,
             Consumer<TaskStatusUpdateEvent> onStatusUpdate,
             String commandContext,
             ResponseMode responseMode,
             boolean readOnly) throws TimeoutException, InterruptedException, BuildAgentClientException {
-        super(termBaseUrl);
+        super(termBaseUrl, 30000);
         this.commandContext = formatCommandContext(commandContext);
         this.responseMode = responseMode;
         this.readOnly = readOnly;
@@ -84,7 +91,25 @@ public class BuildAgentSocketClient extends BuildAgentClientBase implements Buil
             onStatusUpdate.accept(event);
         };
 
-        String wsTermBaseUrl = termBaseUrl.replace("http://", "ws://");
+        statusUpdatesEndpoint = connectStatusListenerClient(termBaseUrl, onStatusUpdateInternal);
+        commandExecutingEndpoint = connectCommandExecutingClient(termBaseUrl, responseDataConsumer);
+    }
+
+    public BuildAgentSocketClient(
+            Optional<Consumer<String>> responseDataConsumer,
+            Consumer<TaskStatusUpdateEvent> onStatusUpdate,
+            SocketClientConfiguration configuration)
+            throws TimeoutException, InterruptedException, BuildAgentClientException {
+        super(configuration.getTermBaseUrl(), configuration.getLivenessResponseTimeout());
+        this.commandContext = formatCommandContext(configuration.getCommandContext());
+        this.responseMode = configuration.getResponseMode();
+        this.readOnly = configuration.isReadOnly();
+
+        Consumer<TaskStatusUpdateEvent> onStatusUpdateInternal = (event) -> {
+            onStatusUpdate.accept(event);
+        };
+
+        String termBaseUrl = configuration.getTermBaseUrl();
         statusUpdatesEndpoint = connectStatusListenerClient(termBaseUrl, onStatusUpdateInternal);
         commandExecutingEndpoint = connectCommandExecutingClient(termBaseUrl, responseDataConsumer);
     }

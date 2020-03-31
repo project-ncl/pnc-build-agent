@@ -34,13 +34,29 @@ public class BuildAgentHttpClient extends BuildAgentClientBase implements BuildA
 
     private String sessionId;
 
+    /**
+     * @see BuildAgentHttpClient( HttpClientConfiguration )
+     */
+    @Deprecated
     public BuildAgentHttpClient(String termBaseUrl, URL callbackUrl, String callbackMethod)
             throws BuildAgentClientException {
-        super(termBaseUrl);
+        super(termBaseUrl, 30000);
         this.callbackUrl = callbackUrl;
         this.callbackMethod = callbackMethod;
         try {
             invokerUrl = new URL(termBaseUrl + Constants.HTTP_INVOKER_FULL_PATH);
+        } catch (MalformedURLException e) {
+            throw new BuildAgentClientException("Invalid term url.", e);
+        }
+    }
+
+    public BuildAgentHttpClient(HttpClientConfiguration configuration)
+            throws BuildAgentClientException {
+        super(configuration.getTermBaseUrl(), configuration.getLivenessResponseTimeout());
+        this.callbackUrl = configuration.getCallbackUrl();
+        this.callbackMethod = configuration.getCallbackMethod();
+        try {
+            invokerUrl = new URL(configuration.getTermBaseUrl() + Constants.HTTP_INVOKER_FULL_PATH);
         } catch (MalformedURLException e) {
             throw new BuildAgentClientException("Invalid term url.", e);
         }
