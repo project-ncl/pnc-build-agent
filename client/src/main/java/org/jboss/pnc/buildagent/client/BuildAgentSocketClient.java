@@ -30,6 +30,7 @@ import javax.websocket.ClientEndpointConfig;
 import javax.websocket.CloseReason;
 import javax.websocket.ContainerProvider;
 import javax.websocket.Session;
+import javax.websocket.WebSocketContainer;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.BufferOverflowException;
@@ -50,6 +51,8 @@ import java.util.function.Consumer;
 public class BuildAgentSocketClient extends BuildAgentClientBase implements BuildAgentClient {
 
     private static final Logger log = LoggerFactory.getLogger(BuildAgentSocketClient.class);
+
+    private static final WebSocketContainer webSocketContainer = ContainerProvider.getWebSocketContainer();
 
     private String commandContext;
 
@@ -191,7 +194,7 @@ public class BuildAgentSocketClient extends BuildAgentClientBase implements Buil
         try {
             String websocketUrl = stripEndingSlash(webSocketBaseUrl) + RemoteEndpoint.WEB_SOCKET_LISTENER_PATH + commandContext;
             ClientEndpointConfig clientEndpointConfig = ClientEndpointConfig.Builder.create().build();
-            ContainerProvider.getWebSocketContainer().connectToServer(client, clientEndpointConfig, new URI(websocketUrl));
+            webSocketContainer.connectToServer(client, clientEndpointConfig, new URI(websocketUrl));
         } catch (Exception e) {
             throw new AssertionError("Failed to connect to remote client.", e);
         }
@@ -225,7 +228,7 @@ public class BuildAgentSocketClient extends BuildAgentClientBase implements Buil
         try {
             String websocketUrl = webSocketPath + commandContext + appendReadOnly;
             ClientEndpointConfig clientEndpointConfig = ClientEndpointConfig.Builder.create().build();
-            ContainerProvider.getWebSocketContainer().connectToServer(client, clientEndpointConfig, new URI(websocketUrl));
+            webSocketContainer.connectToServer(client, clientEndpointConfig, new URI(websocketUrl));
         } catch (Exception e) {
             throw new AssertionError("Failed to connect to remote client.", e);
         }
