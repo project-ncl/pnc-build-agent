@@ -12,14 +12,16 @@ public class StringLiner {
     }
 
     public synchronized String nextLine() {
-        int nlLength = 1;
-        int nlPosition = stringBuffer.indexOf("\n");
-        if (nlPosition == -1) {
-            nlPosition = stringBuffer.indexOf("\r");
-        }
-        if (nlPosition == -1) {
-            nlPosition = stringBuffer.indexOf("\r\n");
+        int nlLength;
+        int nlPosition = stringBuffer.indexOf("\r\n");
+        if (nlPosition > -1) {
             nlLength = 2;
+        } else {
+            nlLength = 1;
+            nlPosition = stringBuffer.indexOf("\n");
+            if (nlPosition == -1) {
+                nlPosition = stringBuffer.indexOf("\r");
+            }
         }
         if (nlPosition > -1) {
             String line = stringBuffer.substring(0, nlPosition);
