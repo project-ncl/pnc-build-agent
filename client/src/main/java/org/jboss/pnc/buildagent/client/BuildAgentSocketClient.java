@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jboss.pnc.buildagent.api.ResponseMode;
 import org.jboss.pnc.buildagent.api.TaskStatusUpdateEvent;
+import org.jboss.pnc.buildagent.common.http.HttpClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -104,6 +105,30 @@ public class BuildAgentSocketClient extends BuildAgentClientBase implements Buil
             SocketClientConfiguration configuration)
             throws TimeoutException, InterruptedException, BuildAgentClientException {
         super(configuration.getTermBaseUrl(), configuration.getLivenessResponseTimeout());
+        this.commandContext = formatCommandContext(configuration.getCommandContext());
+        this.responseMode = configuration.getResponseMode();
+        this.readOnly = configuration.isReadOnly();
+
+        Consumer<TaskStatusUpdateEvent> onStatusUpdateInternal = (event) -> {
+            onStatusUpdate.accept(event);
+        };
+
+        String termBaseUrl = configuration.getTermBaseUrl();
+        statusUpdatesEndpoint = connectStatusListenerClient(termBaseUrl, onStatusUpdateInternal);
+        commandExecutingEndpoint = connectCommandExecutingClient(termBaseUrl, responseDataConsumer);
+    }
+
+    /**
+     * It is preferable to use a single instance of a HttpClient for all the BuildAgentClients because of the HttpClient's
+     * internal thread pool.
+     */
+    public BuildAgentSocketClient(
+            HttpClient httpClient,
+            Optional<Consumer<String>> responseDataConsumer,
+            Consumer<TaskStatusUpdateEvent> onStatusUpdate,
+            SocketClientConfiguration configuration)
+            throws TimeoutException, InterruptedException, BuildAgentClientException {
+        super(httpClient, configuration.getTermBaseUrl(), configuration.getLivenessResponseTimeout());
         this.commandContext = formatCommandContext(configuration.getCommandContext());
         this.responseMode = configuration.getResponseMode();
         this.readOnly = configuration.isReadOnly();

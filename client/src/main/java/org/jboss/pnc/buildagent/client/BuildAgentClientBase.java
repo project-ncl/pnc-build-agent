@@ -7,6 +7,7 @@ import org.jboss.pnc.buildagent.common.http.HttpClient;
 import java.io.Closeable;
 import java.io.IOException;
 import java.net.URI;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -19,7 +20,8 @@ public abstract class BuildAgentClientBase implements Closeable {
 
     private final Logger log = Logger.getLogger(BuildAgentClientBase.class);
 
-    protected final HttpClient httpClient;
+    private final Optional<HttpClient> internalHttpClient;
+    private final Optional<HttpClient> httpClient;
     protected final URI livenessProbeLocation;
     private final long livenessResponseTimeout;
 
@@ -28,18 +30,36 @@ public abstract class BuildAgentClientBase implements Closeable {
         termBaseUrl = StringUtils.stripEndingSlash(termBaseUrl);
         this.livenessProbeLocation = URI.create(termBaseUrl + "/servlet/is-alive");
         try {
-            httpClient = new HttpClient();
+            internalHttpClient = Optional.of(new HttpClient());
+            httpClient = Optional.empty();
         } catch (IOException e) {
             throw new BuildAgentClientException("Cannot initialize http client.", e);
         }
     }
 
+    /**
+     * It is preferable to use a single instance of a HttpClient for all the BuildAgentClients because of the HttpClient's
+     * internal thread pool.
+     *
+     * @param httpClient
+     * @param termBaseUrl
+     * @param livenessResponseTimeout
+     */
+    public BuildAgentClientBase(HttpClient httpClient, String termBaseUrl, long livenessResponseTimeout) {
+        this.livenessResponseTimeout = livenessResponseTimeout;
+        termBaseUrl = StringUtils.stripEndingSlash(termBaseUrl);
+        this.livenessProbeLocation = URI.create(termBaseUrl + "/servlet/is-alive");
+        this.internalHttpClient = Optional.empty();
+        this.httpClient = Optional.of(httpClient);
+    }
+
     public boolean isServerAlive() {
         CompletableFuture<HttpClient.Response> responseFuture = new CompletableFuture<>();
-        httpClient.invoke(livenessProbeLocation, "HEAD", "", responseFuture);
+        getHttpClient().invoke(livenessProbeLocation, "HEAD", "", responseFuture);
         try {
             HttpClient.Response response = responseFuture.get(livenessResponseTimeout, TimeUnit.MILLISECONDS);
-            return response.getCode() == 200;
+            boolean isSuccess = response.getCode() == 200;
+            return isSuccess;
         } catch (InterruptedException | TimeoutException | ExecutionException e) {
             log.warn("Did not receive liveness probe response.", e);
             responseFuture.cancel(true);
@@ -47,8 +67,18 @@ public abstract class BuildAgentClientBase implements Closeable {
         }
     }
 
+    protected HttpClient getHttpClient() {
+        if (internalHttpClient.isPresent()) {
+            return internalHttpClient.get();
+        } else {
+            return httpClient.get();
+        }
+    }
+
     @Override
     public void close() throws IOException {
-        httpClient.close();
+        if (internalHttpClient.isPresent()) {
+            internalHttpClient.get().close();
+        }
     }
 }

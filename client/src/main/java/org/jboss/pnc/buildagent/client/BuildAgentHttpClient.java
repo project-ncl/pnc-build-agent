@@ -62,6 +62,22 @@ public class BuildAgentHttpClient extends BuildAgentClientBase implements BuildA
         }
     }
 
+    /**
+     * It is preferable to use a single instance of a HttpClient for all the BuildAgentClients because of the HttpClient's
+     * internal thread pool.
+     */
+    public BuildAgentHttpClient(HttpClient httpClient, HttpClientConfiguration configuration)
+            throws BuildAgentClientException {
+        super(httpClient, configuration.getTermBaseUrl(), configuration.getLivenessResponseTimeout());
+        this.callbackUrl = configuration.getCallbackUrl();
+        this.callbackMethod = configuration.getCallbackMethod();
+        try {
+            invokerUrl = new URL(configuration.getTermBaseUrl() + Constants.HTTP_INVOKER_FULL_PATH);
+        } catch (MalformedURLException e) {
+            throw new BuildAgentClientException("Invalid term url.", e);
+        }
+    }
+
     @Override
     public void execute(Object command) throws BuildAgentClientException {
         String cmd;
@@ -75,7 +91,7 @@ public class BuildAgentHttpClient extends BuildAgentClientBase implements BuildA
         CompletableFuture<HttpClient.Response> responseFuture = new CompletableFuture<>();
         try {
             String requestJson = objectMapper.writeValueAsString(request);
-            httpClient.invoke(invokerUrl.toURI(), "POST", requestJson, responseFuture);
+            getHttpClient().invoke(invokerUrl.toURI(), "POST", requestJson, responseFuture);
         } catch (JsonProcessingException e) {
             throw new BuildAgentClientException("Cannot serialize request.", e);
         } catch (URISyntaxException e) {
@@ -107,7 +123,7 @@ public class BuildAgentHttpClient extends BuildAgentClientBase implements BuildA
         CompletableFuture<HttpClient.Response> responseFuture = new CompletableFuture<>();
         try {
             String requestJson = objectMapper.writeValueAsString(request);
-            httpClient.invoke(invokerUrl.toURI(), "PUT", requestJson, responseFuture);
+            getHttpClient().invoke(invokerUrl.toURI(), "PUT", requestJson, responseFuture);
         } catch (JsonProcessingException e) {
             throw new BuildAgentClientException("Cannot serialize cancel request.", e);
         } catch (IOException e) {
