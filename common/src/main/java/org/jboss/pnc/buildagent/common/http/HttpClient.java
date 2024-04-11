@@ -49,7 +49,9 @@ public class HttpClient implements Closeable {
     private final ByteBufferPool buffer;
     private final UndertowXnioSsl undertowXnioSsl;
 
+    public final OptionMap options;
     public static final OptionMap DEFAULT_OPTIONS;
+
     public static int DEFAULT_HTTP_WRITE = 30000;
     public static int DEFAULT_HTTP_READ = 30000;
 
@@ -78,31 +80,27 @@ public class HttpClient implements Closeable {
             .getMap());
     }
 
-    public HttpClient(OptionMap options) throws IOException {
-        final Xnio xnio = Xnio.getInstance();
-
-        xnioWorker = xnio.createWorker(null, options);
-
-        buffer = new DefaultByteBufferPool(
+    public HttpClient(OptionMap options) throws IOException{
+        this(Xnio.getInstance().createWorker(null, options),
+            new DefaultByteBufferPool(
                 true,
                 1024 * 16,
                 1000,
                 10,
-                100);
-
-        try {
-            undertowXnioSsl = new UndertowXnioSsl(xnioWorker.getXnio(), DEFAULT_OPTIONS, SSLContext.getDefault());
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        }
+                100),
+            options);
     }
 
     public HttpClient(XnioWorker xnioWorker, ByteBufferPool buffer) throws IOException {
+        this(xnioWorker, buffer, DEFAULT_OPTIONS);
+    }
+
+    public HttpClient(XnioWorker xnioWorker, ByteBufferPool buffer, OptionMap options) throws IOException {
         this.xnioWorker = xnioWorker;
         this.buffer = buffer;
-
+        this.options = options;
         try {
-            undertowXnioSsl = new UndertowXnioSsl(xnioWorker.getXnio(), DEFAULT_OPTIONS, SSLContext.getDefault());
+            undertowXnioSsl = new UndertowXnioSsl(xnioWorker.getXnio(), options, SSLContext.getDefault());
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }
@@ -241,7 +239,7 @@ public class HttpClient implements Closeable {
         Response response = new Response();
 
         CompletableFuture.completedFuture(null).thenCompose(nul -> {
-                undertowClient.connect(clientConnection, uri, xnioWorker, undertowXnioSsl, buffer, DEFAULT_OPTIONS);
+                undertowClient.connect(clientConnection, uri, xnioWorker, undertowXnioSsl, buffer, options);
                 return clientConnectionFuture;
             }
         ).thenCompose(connection -> {
