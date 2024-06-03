@@ -165,7 +165,7 @@
         <artifactId>wildfly-logging</artifactId>
         <!-- KEEP VERSION or migrate to log4j2. Since Wildfly 19 apache.log4j 1.x module was abandoned. -->
         <!-- https://issues.redhat.com/browse/WFCORE-5781 -->
-        <version>18.1.2.Final</version>
+        <version>24.0.1.Final</version>
         <exclusions>
           <exclusion>
             <groupId>org.jboss.msc</groupId>
