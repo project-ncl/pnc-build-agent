@@ -31,9 +31,9 @@ import java.io.IOException;
 /**
  * @author <a href="mailto:matejonnet@gmail.com">Matej Lazar</a>
  */
-public class TaskStatusUpdateEventSerialization {
+public class TaskStatusUpdateEventSerializationTest {
 
-    private static final Logger log = LoggerFactory.getLogger(TaskStatusUpdateEventSerialization.class);
+    private static final Logger log = LoggerFactory.getLogger(TaskStatusUpdateEventSerializationTest.class);
 
     @Test
     public void testTaskStatusUpdateEventSerialization() throws IOException {
