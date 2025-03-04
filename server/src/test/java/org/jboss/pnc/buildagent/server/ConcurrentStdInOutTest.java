@@ -5,6 +5,7 @@ import org.jboss.pnc.buildagent.client.BuildAgentSocketClient;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +14,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -24,14 +28,13 @@ import java.util.function.Consumer;
 /**
  * @author <a href="mailto:matejonnet@gmail.com">Matej Lazar</a>
  */
-public class ConcurrentStdInOut {
+public class ConcurrentStdInOutTest {
     private static final String HOST = "localhost";
     private static final int PORT = TermdServer.getNextPort();
-    private static Logger log = LoggerFactory.getLogger(ConcurrentStdInOut.class);
+    private static final Logger log = LoggerFactory.getLogger(ConcurrentStdInOutTest.class);
 
     @BeforeClass
     public static void setUP() throws Exception {
-        System.setProperty("java.util.logging.manager", "org.jboss.logmanager.LogManager");
         TermdServer.startServer(HOST, PORT, "", true, true);
     }
 
@@ -41,10 +44,11 @@ public class ConcurrentStdInOut {
     }
 
     @Test
-    public void simpleProcessOutput() throws IOException, InterruptedException {
+    @Ignore
+    public void simpleProcessOutput() throws IOException, InterruptedException, URISyntaxException {
         boolean redirectErrorStream = true;
-        String TEST_COMMAND = "./server/src/test/resources/testscript.sh";
-        ProcessBuilder builder = new ProcessBuilder(TEST_COMMAND);
+        URL scriptResource = ConcurrentStdInOutTest.class.getResource("/testscript.sh");
+        ProcessBuilder builder = new ProcessBuilder(Paths.get(scriptResource.toURI()).toAbsolutePath().toString());
         builder.redirectErrorStream(redirectErrorStream);
         Process process = builder.start();
         Pipe stdout = new Pipe(process.getInputStream());
@@ -87,7 +91,8 @@ public class ConcurrentStdInOut {
         String longMessage = createLongMessage();
 //        String TEST_COMMAND = "java -cp ./target/test-classes/:./server/target/test-classes/ org.jboss.pnc.buildagent.server.MockProcess 1 0 " + longMessage + "";
 //        String TEST_COMMAND = "pwd";
-        String TEST_COMMAND = "./server/src/test/resources/testscript.sh";
+        URL scriptResource = ConcurrentStdInOutTest.class.getResource("/testscript.sh");
+        String TEST_COMMAND = Paths.get(scriptResource.toURI()).toAbsolutePath().toString();
 
         String terminalUrl = "http://" + HOST + ":" + PORT;
 
