@@ -34,7 +34,7 @@
     <version.io.termd>1.1.9</version.io.termd>
     <version.undertow>2.2.31.Final</version.undertow>
     <version.junit>4.13.2</version.junit>
-    <version.org.slf4j>1.7.36</version.org.slf4j>
+    <version.org.slf4j>2.0.17</version.org.slf4j>
     <version.commons-cli>1.9.0</version.commons-cli>
     <version.jackson>2.20.1</version.jackson>
     <version.jackson.databind>2.20.1</version.jackson.databind>
