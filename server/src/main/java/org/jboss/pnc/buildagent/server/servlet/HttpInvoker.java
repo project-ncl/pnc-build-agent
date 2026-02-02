@@ -229,7 +229,7 @@ public class HttpInvoker extends HttpServlet {
 
     private void uploadLogsToBifrost(String md5) {
         BifrostLogUploader logUploader = new BifrostLogUploader(URI.create(bifrostUploaderOptions.getBifrostURL()),
-                keycloakClient::getAccessToken,
+                keycloakClient::getBearerAccessToken,
                 bifrostUploaderOptions.getMaxRetries(),
                 bifrostUploaderOptions.getWaitBeforeRetry());
 
@@ -250,8 +250,7 @@ public class HttpInvoker extends HttpServlet {
     private void authenticateCallback(Request original) {
         if (keycloakClient != null) {
             logger.info("Using Keycloak service account token for callback");
-            String accessToken = keycloakClient.getAccessToken();
-            original.getHeaders().add(new Request.Header(HttpHeaders.AUTHORIZATION_STRING, "Bearer " + accessToken));
+            original.getHeaders().add(new Request.Header(HttpHeaders.AUTHORIZATION_STRING, keycloakClient.getBearerAccessToken()));
         }
     }
 }

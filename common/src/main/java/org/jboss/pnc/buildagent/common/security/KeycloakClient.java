@@ -64,7 +64,7 @@ public class KeycloakClient {
      * Get a fresh access token from the OIDC server
      * @return access token
      */
-    public String getAccessToken() {
+    public String getBearerAccessToken() {
         if (useTrustbox) {
             LOGGER.info("Getting keycloak access token from trustbox");
             return "Bearer " + getAccessTokenFromTrustbox();
