@@ -24,7 +24,7 @@ public class KeycloakHeartbeatHttpHeaderProvider implements HeartbeatHttpHeaderP
         if (keycloakClient == null) {
             return Collections.emptyList();
         } else {
-            return Collections.singletonList(new Request.Header(HttpHeaders.AUTHORIZATION_STRING, "Bearer " + keycloakClient.getAccessToken()));
+            return Collections.singletonList(new Request.Header(HttpHeaders.AUTHORIZATION_STRING, keycloakClient.getBearerAccessToken()));
         }
     }
 }
