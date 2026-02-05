@@ -107,6 +107,11 @@
       <groupId>org.keycloak</groupId>
       <artifactId>keycloak-servlet-filter-adapter</artifactId>
     </dependency>
+    <dependency>
+      <groupId>com.unboundid</groupId>
+      <artifactId>unboundid-ldapsdk</artifactId>
+      <scope>compile</scope>
+    </dependency>
 
     <dependency>
       <groupId>io.jsonwebtoken</groupId>
