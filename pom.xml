@@ -31,7 +31,7 @@
   </scm>
 
   <properties>
-    <version.io.termd>1.1.9</version.io.termd>
+    <version.io.termd>1.1.11</version.io.termd>
     <version.undertow>2.2.31.Final</version.undertow>
     <version.junit>4.13.2</version.junit>
     <version.org.slf4j>1.7.36</version.org.slf4j>
