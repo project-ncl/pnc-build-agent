@@ -78,7 +78,6 @@ public class TermdServer {
                     null,
                     "",
                     "",
-                    "",
                     HttpClient.DEFAULT_HTTP_READ,
                     HttpClient.DEFAULT_HTTP_WRITE);
             Map<String, String> mdcMap = new HashMap<>();

@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * This DTO is used to map keycloak.json file to it so that we can do offline checking of tokens
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class KeycloakOfflineOIDCFilterConfiguration {
+public class AuthHeaderFilterConfiguration {
 
     /**
      * The public key of the realm (realm-public-key), as specified in the {auth url}/auth/realms/{realm}
@@ -21,17 +21,25 @@ public class KeycloakOfflineOIDCFilterConfiguration {
     @JsonProperty("auth-server-url")
     private String authServerUrl;
 
-    @JsonProperty("realm")
-    private String realm;
+    @JsonProperty("ldap-host")
+    private String ldapHost;
+
+    @JsonProperty("ldap-port")
+    private int ldapPort;
+
+    @JsonProperty("ldap-search-base")
+    private String ldapSearchBase;
 
     // needed for jackson
-    public KeycloakOfflineOIDCFilterConfiguration() {
+    public AuthHeaderFilterConfiguration() {
     }
 
-    public KeycloakOfflineOIDCFilterConfiguration(String publicKey, String authServerUrl, String realm) {
+    public AuthHeaderFilterConfiguration(String publicKey, String authServerUrl, String ldapHost, int ldapPort, String ldapSearchBase) {
         this.realmPublicKey = publicKey;
         this.authServerUrl = authServerUrl;
-        this.realm = realm;
+        this.ldapHost = ldapHost;
+        this.ldapPort = ldapPort;
+        this.ldapSearchBase = ldapSearchBase;
     }
 
     public String getRealmPublicKey() {
@@ -50,11 +58,27 @@ public class KeycloakOfflineOIDCFilterConfiguration {
         this.authServerUrl = authServerUrl;
     }
 
-    public String getRealm() {
-        return realm;
+    public String getLdapHost() {
+        return ldapHost;
     }
 
-    public void setRealm(String realm) {
-        this.realm = realm;
+    public void setLdapHost(String ldapHost) {
+        this.ldapHost = ldapHost;
+    }
+
+    public int getLdapPort() {
+        return ldapPort;
+    }
+
+    public void setLdapPort(int ldapPort) {
+        this.ldapPort = ldapPort;
+    }
+
+    public String getLdapSearchBase() {
+        return ldapSearchBase;
+    }
+
+    public void setLdapSearchBase(String ldapSearchBase) {
+        this.ldapSearchBase = ldapSearchBase;
     }
 }

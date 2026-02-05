@@ -72,8 +72,7 @@ public class Main {
         options.addOption(null, "bifrostURL",true, "Bifrost URL for final log upload.");
         options.addOption(null, "bifrostMaxRetries",true, "How many times to retry failed final log upload.");
         options.addOption(null, "bifrostWaitBeforeRetry",true, "How long to wait before final log upload retry (calculated as: attempt x duration-in-seconds).");
-        options.addOption(null, "keycloakConfig",true, "Path to Keycloak config file. Must be set to enable endpoint protection.");
-        options.addOption(null, "keycloakOfflineConfig",true, "Path to Keycloak config file. Must be set to enable endpoint protection.");
+        options.addOption(null, "authHeaderConfig",true, "Path to authHeader config file. Must be set to enable endpoint protection.");
         options.addOption(null, "keycloakClientConfig", true, "Path to Keycloak client config file. Must be set to enable callback authentication");
         options.addOption(null, "httpReadTimeout", true, "Http client timeout for read operations. The value is number in milliseconds (default is " + DEFAULT_HTTP_READ + "ms).");
         options.addOption(null, "httpWriteTimeout", true, "Http client timeout for write operations. The value is number in milliseconds (default is " + DEFAULT_HTTP_WRITE + "ms).");
@@ -142,8 +141,8 @@ public class Main {
 
         String primaryLoggersString = getOption(cmd, "pl", "FILE");
         String[] primaryLoggersStrArr = primaryLoggersString.split(",");
-        List<IoLoggerName> primaryLogersList = Arrays.asList(primaryLoggersStrArr).stream()
-                .map(l -> IoLoggerName.valueOf(l))
+        List<IoLoggerName> primaryLogersList = Arrays.stream(primaryLoggersStrArr)
+                .map(IoLoggerName::valueOf)
                 .collect(Collectors.toList());
         IoLoggerName[] primaryLoggers = primaryLogersList.toArray(new IoLoggerName[primaryLogersList.size()]);
 
@@ -152,8 +151,7 @@ public class Main {
         boolean httpInvokerEnabled = Boolean.parseBoolean(getOption(cmd, "enableHttpInvoker", "false"));
         int callbackMaxRetries = Integer.parseInt(getOption(cmd, "callbackMaxRetries", "10"));
         long callbackWaitBeforeRetry = Long.parseLong(getOption(cmd, "callbackWaitBeforeRetry", "500"));
-        String keycloakConfigFile = getOption(cmd, "keycloakConfig", "");
-        String keycloakOfflineConfigFile = getOption(cmd, "keycloakOfflineConfig", "");
+        String authHeaderConfigFile = getOption(cmd, "authHeaderConfig", "");
         String keycloakClientConfigFile = getOption(cmd, "keycloakClientConfig", "");
 
         String httpReadTimeoutString = getOption(cmd, "httpReadTimeout", null);
@@ -191,8 +189,7 @@ public class Main {
                 callbackMaxRetries,
                 callbackWaitBeforeRetry,
                 bifrostUploaderOptions,
-                keycloakConfigFile,
-                keycloakOfflineConfigFile,
+                authHeaderConfigFile,
                 keycloakClientConfigFile,
                 httpReadTimeout,
                 httpWriteTimeout);
