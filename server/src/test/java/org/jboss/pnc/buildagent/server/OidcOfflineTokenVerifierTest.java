@@ -13,29 +13,27 @@ import java.util.Base64;
 import java.util.Date;
 import java.util.UUID;
 
-public class KeycloakOfflineTokenVerifierTest {
+public class OidcOfflineTokenVerifierTest {
 
     @Test
     public void testPublicKeyVerification() throws Exception {
 
         KeyPair kp = generateRSAKeyPair();
         Instant now = Instant.now();
-        String authServerUrl = "https://rudolph";
-        String realm = "test";
-        String issuer = authServerUrl + "/realms/" + realm;
+        String authServerUrl = "https://rudolph/realms/test";
 
         String jwtToken = Jwts.builder()
                 .claim("name", "Jane Doe")
                 .claim("email", "jane@example.com")
                 .subject("jane")
                 .id(UUID.randomUUID().toString())
-                .issuer(issuer)
+                .issuer(authServerUrl)
                 .issuedAt(Date.from(now))
                 .expiration(Date.from(now.plus(5, ChronoUnit.MINUTES)))
                 .signWith(kp.getPrivate())
                 .compact();
 
-        KeycloakOfflineTokenVerifier.verify(jwtToken, textPublicKey(kp.getPublic()), authServerUrl, realm);
+        OidcOfflineTokenVerifier.verify(jwtToken, textPublicKey(kp.getPublic()), authServerUrl);
     }
 
     @Test
@@ -43,9 +41,7 @@ public class KeycloakOfflineTokenVerifierTest {
 
         KeyPair kp = generateRSAKeyPair();
         Instant now = Instant.now();
-        String authServerUrl = "https://rudolph";
-        String realm = "test";
-        String issuer = authServerUrl + "/realms/" + realm;
+        String authServerUrl = "https://rudolph/realms/test";
 
         // this token has already expired
         String jwtToken = Jwts.builder()
@@ -53,14 +49,14 @@ public class KeycloakOfflineTokenVerifierTest {
                 .claim("email", "jane@example.com")
                 .subject("jane")
                 .id(UUID.randomUUID().toString())
-                .issuer(issuer)
+                .issuer(authServerUrl)
                 .issuedAt(Date.from(now.minus(10, ChronoUnit.MINUTES)))
                 .expiration(Date.from(now.minus(5, ChronoUnit.MINUTES)))
                 .signWith(kp.getPrivate())
                 .compact();
 
         // token expired, so this should fail
-        Assert.assertThrows(Exception.class, () -> KeycloakOfflineTokenVerifier.verify(jwtToken, textPublicKey(kp.getPublic()), authServerUrl, realm));
+        Assert.assertThrows(Exception.class, () -> OidcOfflineTokenVerifier.verify(jwtToken, textPublicKey(kp.getPublic()), authServerUrl));
     }
 
     @Test
@@ -70,9 +66,7 @@ public class KeycloakOfflineTokenVerifierTest {
         KeyPair kpSecond = generateRSAKeyPair();
 
         Instant now = Instant.now();
-        String authServerUrl = "https://rudolph";
-        String realm = "test";
-        String issuer = authServerUrl + "/realms/" + realm;
+        String authServerUrl = "https://rudolph/realms/test";
 
         // this token has already expired
         String jwtToken = Jwts.builder()
@@ -82,12 +76,12 @@ public class KeycloakOfflineTokenVerifierTest {
                 .id(UUID.randomUUID().toString())
                 .issuedAt(Date.from(now))
                 .expiration(Date.from(now.plus(5, ChronoUnit.MINUTES)))
-                .issuer(issuer)
+                .issuer(authServerUrl)
                 .signWith(kp.getPrivate())
                 .compact();
 
         // use a completely different public key, this verification should fail
-        Assert.assertThrows(Exception.class, () -> KeycloakOfflineTokenVerifier.verify(jwtToken, textPublicKey(kpSecond.getPublic()), authServerUrl, realm));
+        Assert.assertThrows(Exception.class, () -> OidcOfflineTokenVerifier.verify(jwtToken, textPublicKey(kpSecond.getPublic()), authServerUrl));
     }
 
     @Test
@@ -109,7 +103,7 @@ public class KeycloakOfflineTokenVerifierTest {
                 .compact();
 
         // all good, except with the wrong issuer
-        Assert.assertThrows(Exception.class, () -> KeycloakOfflineTokenVerifier.verify(jwtToken, textPublicKey(kp.getPublic()), "https://booya.com/no", "way"));
+        Assert.assertThrows(Exception.class, () -> OidcOfflineTokenVerifier.verify(jwtToken, textPublicKey(kp.getPublic()), "https://booya.com/no"));
     }
 
     private KeyPair generateRSAKeyPair() throws Exception {

@@ -20,7 +20,6 @@ package org.jboss.pnc.buildagent.server;
 
 import org.jboss.pnc.buildagent.common.BuildAgentException;
 import org.jboss.pnc.buildagent.common.RandomUtils;
-import org.jboss.pnc.buildagent.common.http.HttpClient;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -50,7 +49,7 @@ public class TestPathMappings {
     public void serverShouldListenOnRoot() throws BuildAgentException, InterruptedException, IOException {
         Map<String, String> mdcMap = new HashMap<>();
         mdcMap.put("ctx", RandomUtils.randString(8));
-        Options options = new Options(HOST, 0, "", true, false, 3, 100, null, "", "", "", DEFAULT_HTTP_READ, DEFAULT_HTTP_WRITE);
+        Options options = new Options(HOST, 0, "", true, false, 3, 100, null, "", "", DEFAULT_HTTP_READ, DEFAULT_HTTP_WRITE);
 
         BuildAgentServer buildAgent = new BuildAgentServer(Optional.empty(), Optional.empty(), new IoLoggerName[0], options, mdcMap);
 
@@ -68,7 +67,7 @@ public class TestPathMappings {
         Map<String, String> mdcMap = new HashMap<>();
         mdcMap.put("ctx", RandomUtils.randString(8));
         String contextPath = "ctx-path";
-        Options options = new Options(HOST, 0, "/" + contextPath, true, false,3, 100, null, "", "", "", DEFAULT_HTTP_READ, DEFAULT_HTTP_WRITE);
+        Options options = new Options(HOST, 0, "/" + contextPath, true, false,3, 100, null, "", "", DEFAULT_HTTP_READ, DEFAULT_HTTP_WRITE);
         BuildAgentServer buildAgent = new BuildAgentServer(Optional.empty(), Optional.empty(), new IoLoggerName[0], options, mdcMap);
 
         HttpURLConnection connection200 = connectToUrl(buildAgent.getPort(), contextPath);
