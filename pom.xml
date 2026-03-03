@@ -8,6 +8,8 @@
     <version>52</version>
   </parent>
 
+  <!-- Random comment -->
+
   <groupId>org.jboss.pnc.build-agent</groupId>
   <artifactId>parent</artifactId>
   <version>1.1.9-SNAPSHOT</version>
