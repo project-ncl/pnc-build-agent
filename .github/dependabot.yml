@@ -15,6 +15,7 @@ updates:
       - dependency-name: "org.jboss.slf4j:slf4j-jboss-logmanager"
       - dependency-name: "org.wildfly.core:wildfly-logging"
       - dependency-name: "ch.qos.logback:logback-classic"
+      - dependency-name: "org.apache.httpcomponents.client5:httpclient5"
 
   - package-ecosystem: "github-actions" # Also update Github actions
     directory: "/"
