@@ -311,7 +311,7 @@
         <groupId>org.apache.httpcomponents.client5</groupId>
         <artifactId>httpclient5</artifactId>
         <!-- Note: do NOT update this dependency once https://issues.apache.org/jira/browse/HTTPCLIENT-2413 is done -->
-        <version>5.6</version>
+        <version>5.5.1</version>
       </dependency>
 
       <!-- Test dependencies -->
