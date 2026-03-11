@@ -39,13 +39,14 @@ import org.jboss.pnc.buildagent.common.http.HeartbeatSender;
 import org.jboss.pnc.buildagent.common.security.KeycloakClient;
 import org.jboss.pnc.buildagent.common.security.KeycloakClientConfiguration;
 import org.jboss.pnc.buildagent.common.security.KeycloakClientConfigurationException;
+import org.jboss.pnc.buildagent.common.security.LdapClient;
 import org.jboss.pnc.buildagent.server.httpinvoker.SessionRegistry;
 import org.jboss.pnc.buildagent.server.servlet.Download;
 import org.jboss.pnc.buildagent.server.servlet.HttpInvoker;
 import org.jboss.pnc.buildagent.server.servlet.Terminal;
 import org.jboss.pnc.buildagent.server.servlet.Upload;
 import org.jboss.pnc.buildagent.server.servlet.Welcome;
-import org.jboss.pnc.buildagent.server.termserver.KeycloakHeartbeatHttpHeaderProvider;
+import org.jboss.pnc.buildagent.server.termserver.GeneralHeartbeatHttpHeaderProvider;
 import org.jboss.pnc.buildagent.server.termserver.Term;
 import org.jboss.pnc.common.Strings;
 import org.slf4j.Logger;
@@ -138,8 +139,12 @@ public class BootstrapUndertow {
                     throw new BuildAgentException("Cannot read the Keycloak client configuration file", e);
                 }
             }
+            LdapClient ldapClient = null;
+            if (!options.getLdapClientConfigFile().isEmpty()) {
+                ldapClient = new LdapClient(options.getLdapClientConfigFile());
+            }
 
-            HeartbeatHttpHeaderProvider heartbeatHttpHeaderProvider = new KeycloakHeartbeatHttpHeaderProvider(keycloakClient);
+            HeartbeatHttpHeaderProvider heartbeatHttpHeaderProvider = new GeneralHeartbeatHttpHeaderProvider(keycloakClient, ldapClient);
             RetryConfig retryConfig = new RetryConfig(
                     options.getCallbackMaxRetries(),
                     options.getCallbackWaitBeforeRetry());
@@ -152,7 +157,8 @@ public class BootstrapUndertow {
                                     retryConfig,
                                     new HeartbeatSender(httpClient, heartbeatHttpHeaderProvider),
                                     options.getBifrostUploaderOptions(),
-                                    keycloakClient)
+                                    keycloakClient,
+                                    ldapClient)
                     ).addMapping(HTTP_INVOKER_PATH + "/*"));
             configureAuthentication(options, servletBuilder, HTTP_INVOKER_PATH + "/*");
         }

@@ -33,6 +33,22 @@ The `authHeaderConfig` is used to validate the token for OIDC/OAuth/OpenID using
 }
 ```
 
+LDAP Client
+===========
+The build-agent sends a callback on completion to the original caller. The callback needs to be authenticated to be
+accepted by the original caller. To obtain the proper Authorization access token for the callback, use the CLI option:
+```
+-DldapClientConfigFile=<filename>
+```
+
+The filename should have the following content:
+```
+<username>:<password>
+```
+
+If both the ldap and keycloak client config (section below) are specified, the ldap client has precedence.
+
+
 Keycloak Client
 ===============
 The build-agent sends a callback on completion to the original caller. The callback needs to be authenticated to be

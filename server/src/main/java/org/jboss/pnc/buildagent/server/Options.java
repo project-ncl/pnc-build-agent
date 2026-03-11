@@ -19,6 +19,7 @@ public class Options {
     private final String authHeaderConfigFile;
 
     private final String keycloakClientConfigFile;
+    private final String ldapClientConfigFile;
     private final int httpReadTimeout;
     private final int httpWriteTimeout;
 
@@ -35,6 +36,7 @@ public class Options {
         BifrostUploaderOptions bifrostUploaderOptions,
         String authHeaderConfigFile,
         String keycloakClientConfigFile,
+        String ldapClientConfigFile,
         int httpReadTimeout,
         int httpWriteTimeout) {
         this.host = host;
@@ -46,6 +48,7 @@ public class Options {
         this.bifrostUploaderOptions = bifrostUploaderOptions;
         this.authHeaderConfigFile = authHeaderConfigFile;
         this.keycloakClientConfigFile = keycloakClientConfigFile;
+        this.ldapClientConfigFile = ldapClientConfigFile;
         this.httpReadTimeout = httpReadTimeout;
         this.httpWriteTimeout = httpWriteTimeout;
 
@@ -98,6 +101,10 @@ public class Options {
 
     public String getKeycloakClientConfigFile() {
         return keycloakClientConfigFile;
+    }
+
+    public String getLdapClientConfigFile() {
+        return ldapClientConfigFile;
     }
 
     public int getHttpReadTimeout() {

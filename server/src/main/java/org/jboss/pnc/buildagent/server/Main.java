@@ -153,6 +153,7 @@ public class Main {
         long callbackWaitBeforeRetry = Long.parseLong(getOption(cmd, "callbackWaitBeforeRetry", "500"));
         String authHeaderConfigFile = getOption(cmd, "authHeaderConfig", "");
         String keycloakClientConfigFile = getOption(cmd, "keycloakClientConfig", "");
+        String ldapClientConfigFile = getOption(cmd, "ldapClientConfig", "");
 
         String httpReadTimeoutString = getOption(cmd, "httpReadTimeout", null);
         int httpReadTimeout;
@@ -191,6 +192,7 @@ public class Main {
                 bifrostUploaderOptions,
                 authHeaderConfigFile,
                 keycloakClientConfigFile,
+                ldapClientConfigFile,
                 httpReadTimeout,
                 httpWriteTimeout);
 
