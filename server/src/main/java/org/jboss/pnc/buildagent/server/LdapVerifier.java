@@ -53,7 +53,7 @@ public class LdapVerifier {
             // Step 2: Search for the user to get their full DN
             // Filter.createEqualityFilter handles escaping automatically (prevents injection)
             Filter filter = Filter.createEqualityFilter("mail", username);
-            SearchRequest searchRequest = new SearchRequest(searchBase, SearchScope.SUB, filter, "1.1"); // "1.1" means return no attributes
+            SearchRequest searchRequest = new SearchRequest(searchBase, SearchScope.SUB, filter, "dn");
 
             SearchResult result = conn.search(searchRequest);
 
