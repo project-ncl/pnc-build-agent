@@ -16,6 +16,7 @@ updates:
       - dependency-name: "org.wildfly.core:wildfly-logging"
       - dependency-name: "ch.qos.logback:logback-classic"
       - dependency-name: "org.apache.httpcomponents.client5:httpclient5"
+      - dependency-name: "org.apache.maven.plugins:maven-assembly-plugin" # don't touch this, it breaks kafka integration
 
   - package-ecosystem: "github-actions" # Also update Github actions
     directory: "/"
