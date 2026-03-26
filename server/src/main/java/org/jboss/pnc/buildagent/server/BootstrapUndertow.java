@@ -39,16 +39,16 @@ import org.jboss.pnc.buildagent.common.http.HeartbeatSender;
 import org.jboss.pnc.buildagent.common.security.KeycloakClient;
 import org.jboss.pnc.buildagent.common.security.KeycloakClientConfiguration;
 import org.jboss.pnc.buildagent.common.security.KeycloakClientConfigurationException;
+import org.jboss.pnc.buildagent.common.security.LdapClient;
 import org.jboss.pnc.buildagent.server.httpinvoker.SessionRegistry;
 import org.jboss.pnc.buildagent.server.servlet.Download;
 import org.jboss.pnc.buildagent.server.servlet.HttpInvoker;
 import org.jboss.pnc.buildagent.server.servlet.Terminal;
 import org.jboss.pnc.buildagent.server.servlet.Upload;
 import org.jboss.pnc.buildagent.server.servlet.Welcome;
-import org.jboss.pnc.buildagent.server.termserver.KeycloakHeartbeatHttpHeaderProvider;
+import org.jboss.pnc.buildagent.server.termserver.GeneralHeartbeatHttpHeaderProvider;
 import org.jboss.pnc.buildagent.server.termserver.Term;
 import org.jboss.pnc.common.Strings;
-import org.keycloak.adapters.servlet.KeycloakOIDCFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,7 +71,6 @@ import static io.undertow.servlet.Servlets.deployment;
 import static io.undertow.servlet.Servlets.servlet;
 import static org.jboss.pnc.buildagent.api.Constants.HTTP_INVOKER_PATH;
 import static org.jboss.pnc.buildagent.api.Constants.RUNNING_PROCESSES;
-import static org.keycloak.adapters.servlet.KeycloakOIDCFilter.CONFIG_FILE_PARAM;
 
 /**
  * @author <a href="mailto:matejonnet@gmail.com">Matej Lazar</a>
@@ -119,8 +118,8 @@ public class BootstrapUndertow {
                         servlet("DownloaderServlet", Download.class)
                                 .addMapping("/download/*"));
 
-        configureKeycloak(options, servletBuilder, "/terminal/*");
-        configureKeycloak(options, servletBuilder, "/upload/*");
+        configureAuthentication(options, servletBuilder, "/terminal/*");
+        configureAuthentication(options, servletBuilder, "/upload/*");
 
         if (options.isHttpInvokerEnabled()) {
 
@@ -140,8 +139,12 @@ public class BootstrapUndertow {
                     throw new BuildAgentException("Cannot read the Keycloak client configuration file", e);
                 }
             }
+            LdapClient ldapClient = null;
+            if (!options.getLdapClientConfigFile().isEmpty()) {
+                ldapClient = new LdapClient(options.getLdapClientConfigFile());
+            }
 
-            HeartbeatHttpHeaderProvider heartbeatHttpHeaderProvider = new KeycloakHeartbeatHttpHeaderProvider(keycloakClient);
+            HeartbeatHttpHeaderProvider heartbeatHttpHeaderProvider = new GeneralHeartbeatHttpHeaderProvider(keycloakClient, ldapClient);
             RetryConfig retryConfig = new RetryConfig(
                     options.getCallbackMaxRetries(),
                     options.getCallbackWaitBeforeRetry());
@@ -154,9 +157,10 @@ public class BootstrapUndertow {
                                     retryConfig,
                                     new HeartbeatSender(httpClient, heartbeatHttpHeaderProvider),
                                     options.getBifrostUploaderOptions(),
-                                    keycloakClient)
+                                    keycloakClient,
+                                    ldapClient)
                     ).addMapping(HTTP_INVOKER_PATH + "/*"));
-            configureKeycloak(options, servletBuilder, HTTP_INVOKER_PATH + "/*");
+            configureAuthentication(options, servletBuilder, HTTP_INVOKER_PATH + "/*");
         }
 
         DeploymentManager manager = defaultContainer().addDeployment(servletBuilder);
@@ -323,41 +327,25 @@ public class BootstrapUndertow {
         return result;
     }
 
-    private void configureKeycloak(Options options, DeploymentInfo servletBuilder, String mapping) {
+    private void configureAuthentication(Options options, DeploymentInfo servletBuilder, String mapping) {
 
-        boolean isKeycloakOfflineConfigFileSpecified = !Strings.isEmpty(options.getKeycloakOfflineConfigFile());
-        boolean isKeycloakConfigFileSpecified = !Strings.isEmpty(options.getKeycloakConfigFile());
-
-        if (isKeycloakOfflineConfigFileSpecified && isKeycloakConfigFileSpecified) {
-            log.warn("Both keycloakOfflineConfig and keycloakConfig configured! Only keycloakOfflineConfig will be used");
-        }
-
-        // if no keycloak configuration is specified at all
-        if (!isKeycloakOfflineConfigFileSpecified && !isKeycloakConfigFileSpecified) {
-            log.warn("Endpoint authentication is NOT ENABLED!. Specify keycloak config file.");
+        boolean isAuthHeaderConfigFileNotSpecified = Strings.isEmpty(options.getAuthHeaderConfigFile());
+        if (isAuthHeaderConfigFileNotSpecified) {
+            log.warn("Endpoint authentication is NOT ENABLED!. Specify auth header config file.");
             return;
         }
 
-        // if we are here, we need to configure a keycloak filter
+        // if we are here, we need to configure the auth filter
         Class<? extends Filter> filterClassName = null;
         String configFile = null;
 
-        if (isKeycloakOfflineConfigFileSpecified) {
+        filterClassName = AuthHeaderFilter.class;
+        configFile = options.getAuthHeaderConfigFile();
 
-            filterClassName = KeycloakOfflineOIDCFilter.class;
-            configFile = options.getKeycloakOfflineConfigFile();
+        FilterInfo authHeaderFilter = Servlets.filter(filterClassName.getSimpleName(), filterClassName);
+        authHeaderFilter.addInitParam(AuthHeaderFilter.AUTH_HEADER_PARAM, configFile);
 
-        } else if (isKeycloakConfigFileSpecified) {
-
-            filterClassName = KeycloakOIDCFilter.class;
-            configFile = options.getKeycloakConfigFile();
-
-        }
-
-        FilterInfo keycloakOIDCFilter = Servlets.filter(filterClassName.getSimpleName(), filterClassName);
-        keycloakOIDCFilter.addInitParam(CONFIG_FILE_PARAM, configFile);
-
-        servletBuilder.addFilter(keycloakOIDCFilter);
+        servletBuilder.addFilter(authHeaderFilter);
         servletBuilder.addFilterUrlMapping(filterClassName.getSimpleName(), mapping, DispatcherType.REQUEST);
     }
 }

@@ -7,6 +7,7 @@ import org.jboss.pnc.buildagent.api.httpinvoke.RetryConfig;
 import org.jboss.pnc.buildagent.common.http.HttpClient;
 import org.jboss.pnc.buildagent.common.http.HeartbeatSender;
 import org.jboss.pnc.buildagent.common.security.KeycloakClient;
+import org.jboss.pnc.buildagent.common.security.LdapClient;
 import org.jboss.pnc.buildagent.server.httpinvoker.SessionRegistry;
 import org.jboss.pnc.buildagent.server.servlet.HttpInvoker;
 
@@ -29,6 +30,7 @@ public class HttpInvokerFactory implements InstanceFactory<HttpInvoker> {
     private final HeartbeatSender heartbeat;
 
     private final KeycloakClient keycloakClient;
+    private final LdapClient ldapClient;
 
     public HttpInvokerFactory(
             Set<ReadOnlyChannel> readOnlyChannels,
@@ -37,7 +39,8 @@ public class HttpInvokerFactory implements InstanceFactory<HttpInvoker> {
             RetryConfig retryConfig,
             HeartbeatSender heartbeat,
             BifrostUploaderOptions bifrostUploaderOptions,
-            KeycloakClient keycloakClient) {
+            KeycloakClient keycloakClient,
+            LdapClient ldapClient) {
         this.readOnlyChannels = readOnlyChannels;
         this.httpClient = httpClient;
         this.sessionRegistry = sessionRegistry;
@@ -45,6 +48,7 @@ public class HttpInvokerFactory implements InstanceFactory<HttpInvoker> {
         this.bifrostUploaderOptions = bifrostUploaderOptions;
         this.heartbeat = heartbeat;
         this.keycloakClient = keycloakClient;
+        this.ldapClient = ldapClient;
     }
 
     @Override
@@ -57,7 +61,8 @@ public class HttpInvokerFactory implements InstanceFactory<HttpInvoker> {
                     retryConfig,
                     heartbeat,
                     bifrostUploaderOptions,
-                    keycloakClient));
+                    keycloakClient,
+                    ldapClient));
         } catch (NoSuchAlgorithmException e) {
             throw new InstantiationException("Cannot create HttpInvoker: " + e.getMessage());
         }

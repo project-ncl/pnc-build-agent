@@ -21,6 +21,7 @@ import org.jboss.pnc.buildagent.common.Arrays;
 import org.jboss.pnc.buildagent.common.http.HeartbeatSender;
 import org.jboss.pnc.buildagent.common.http.HttpClient;
 import org.jboss.pnc.buildagent.common.security.KeycloakClient;
+import org.jboss.pnc.buildagent.common.security.LdapClient;
 import org.jboss.pnc.buildagent.common.security.Md5;
 import org.jboss.pnc.buildagent.server.BifrostUploaderOptions;
 import org.jboss.pnc.buildagent.server.ReadOnlyChannel;
@@ -76,6 +77,8 @@ public class HttpInvoker extends HttpServlet {
 
     private final KeycloakClient keycloakClient;
 
+    private final LdapClient ldapClient;
+
     private final LogMatcher logMatcher;
 
     public HttpInvoker(
@@ -85,7 +88,8 @@ public class HttpInvoker extends HttpServlet {
             RetryConfig retryConfig,
             HeartbeatSender heartbeat,
             BifrostUploaderOptions bifrostUploaderOptions,
-            KeycloakClient keycloakClient)
+            KeycloakClient keycloakClient,
+            LdapClient ldapClient)
             throws NoSuchAlgorithmException {
         this.readOnlyChannels = readOnlyChannels;
         this.sessionRegistry = sessionRegistry;
@@ -95,6 +99,7 @@ public class HttpInvoker extends HttpServlet {
         this.heartbeat = heartbeat;
         this.stdoutChecksum = new Md5();
         this.keycloakClient = keycloakClient;
+        this.ldapClient = ldapClient;
         // NCL-6736: Check if we have and indy connection refused in our logs
         this.logMatcher = new LogMatcher(Pattern.compile("Connect to indy.* failed: Connection refused"));
     }
@@ -228,10 +233,18 @@ public class HttpInvoker extends HttpServlet {
     }
 
     private void uploadLogsToBifrost(String md5) {
-        BifrostLogUploader logUploader = new BifrostLogUploader(URI.create(bifrostUploaderOptions.getBifrostURL()),
-                keycloakClient::getBearerAccessToken,
-                bifrostUploaderOptions.getMaxRetries(),
-                bifrostUploaderOptions.getWaitBeforeRetry());
+        BifrostLogUploader logUploader = null;
+        if (ldapClient != null) {
+            logUploader = new BifrostLogUploader(URI.create(bifrostUploaderOptions.getBifrostURL()),
+                    ldapClient::getBasicAuthHeaderValue,
+                    bifrostUploaderOptions.getMaxRetries(),
+                    bifrostUploaderOptions.getWaitBeforeRetry());
+        } else if (keycloakClient != null) {
+            logUploader = new BifrostLogUploader(URI.create(bifrostUploaderOptions.getBifrostURL()),
+                    keycloakClient::getBearerAccessToken,
+                    bifrostUploaderOptions.getMaxRetries(),
+                    bifrostUploaderOptions.getWaitBeforeRetry());
+        }
 
         Map<String, String> mdc = bifrostUploaderOptions.getMdc();
 
@@ -248,7 +261,10 @@ public class HttpInvoker extends HttpServlet {
     }
 
     private void authenticateCallback(Request original) {
-        if (keycloakClient != null) {
+        if (ldapClient != null) {
+            logger.info("Using LDAP service account token for callback");
+            original.getHeaders().add(new Request.Header(HttpHeaders.AUTHORIZATION_STRING, ldapClient.getBasicAuthHeaderValue()));
+        } else if (keycloakClient != null) {
             logger.info("Using Keycloak service account token for callback");
             original.getHeaders().add(new Request.Header(HttpHeaders.AUTHORIZATION_STRING, keycloakClient.getBearerAccessToken()));
         }

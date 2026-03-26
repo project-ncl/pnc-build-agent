@@ -20,7 +20,6 @@ package org.jboss.pnc.buildagent.server;
 
 import org.jboss.pnc.buildagent.common.BuildAgentException;
 import org.jboss.pnc.buildagent.common.RandomUtils;
-import org.jboss.pnc.buildagent.common.http.HttpClient;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;

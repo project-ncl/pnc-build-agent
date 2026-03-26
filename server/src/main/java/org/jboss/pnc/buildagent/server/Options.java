@@ -16,13 +16,10 @@ public class Options {
     private final boolean httpInvokerEnabled;
     private final int callbackMaxRetries;
     private final long callbackWaitBeforeRetry;
-    private String keycloakConfigFile;
+    private final String authHeaderConfigFile;
 
-    /**
-     * Specify this if we want to verify the access token from a request offline
-     */
-    private String keycloakOfflineConfigFile;
-    private String keycloakClientConfigFile;
+    private final String keycloakClientConfigFile;
+    private final String ldapClientConfigFile;
     private final int httpReadTimeout;
     private final int httpWriteTimeout;
 
@@ -37,9 +34,9 @@ public class Options {
         int callbackMaxRetries,
         long callbackWaitBeforeRetry,
         BifrostUploaderOptions bifrostUploaderOptions,
-        String keycloakConfigFile,
-        String keycloakOfflineConfigFile,
+        String authHeaderConfigFile,
         String keycloakClientConfigFile,
+        String ldapClientConfigFile,
         int httpReadTimeout,
         int httpWriteTimeout) {
         this.host = host;
@@ -49,9 +46,9 @@ public class Options {
         this.callbackMaxRetries = callbackMaxRetries;
         this.callbackWaitBeforeRetry = callbackWaitBeforeRetry;
         this.bifrostUploaderOptions = bifrostUploaderOptions;
-        this.keycloakConfigFile = keycloakConfigFile;
-        this.keycloakOfflineConfigFile = keycloakOfflineConfigFile;
+        this.authHeaderConfigFile = authHeaderConfigFile;
         this.keycloakClientConfigFile = keycloakClientConfigFile;
+        this.ldapClientConfigFile = ldapClientConfigFile;
         this.httpReadTimeout = httpReadTimeout;
         this.httpWriteTimeout = httpWriteTimeout;
 
@@ -98,16 +95,16 @@ public class Options {
         return callbackWaitBeforeRetry;
     }
 
-    public String getKeycloakConfigFile() {
-        return keycloakConfigFile;
-    }
-
-    public String getKeycloakOfflineConfigFile() {
-        return keycloakOfflineConfigFile;
+    public String getAuthHeaderConfigFile() {
+        return authHeaderConfigFile;
     }
 
     public String getKeycloakClientConfigFile() {
         return keycloakClientConfigFile;
+    }
+
+    public String getLdapClientConfigFile() {
+        return ldapClientConfigFile;
     }
 
     public int getHttpReadTimeout() {

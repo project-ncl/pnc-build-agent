@@ -20,21 +20,34 @@ Example using Kafka destination: -kp enables Kafka, -pl defines is as the destin
 
 Authentication of Build Agent endpoints
 =======================================
-build-agent can be configured to require an OIDC token for some endpoints. This is done by either providing the `keycloakConfigurationFile` or the `keycloakOfflineConfigurationFile`.
+build-agent can be configured to require an OIDC token for some endpoints. This is done by providing the `authHeaderConfig` option with the appropriate file.
 
-The `keycloakConfigurationFile` follows the [keycloak.json](https://www.keycloak.org/docs/latest/securing_apps/) format and uses the discovery url ({auth url}/auth/realms/{realm}/.well-known/openid-configuration) to find the urls, public keys, and issuer information to validate the token.
-
-In contrast, the `keycloakOfflineConfigurationFile` is used to validate the token using offline techniques only using the public key (obtained from {auth url}/auth/realms/{realm}) and the issuer url only. This is useful when we run build-agent inside a firewall that limits outgoing connections to other servers. The format of the file to provide is:
+The `authHeaderConfig` is used to validate the token for OIDC/OAuth/OpenID using offline techniques only using the public key (obtained from {auth url}/auth/realms/{realm}) and the issuer url only. This is useful when we run build-agent inside a firewall that limits outgoing connections to other servers. It is also used to verify Basic authentication using LDAP. The format of the file to provide is:
 ```json
 {
   "realm-public-key": "public-key",
-  "auth-server-url": "{auth-url}/auth",
-  "realm": "hahaha"
+  "auth-server-url": "{auth-url}/auth/realms/realm",
+  "ldap-host": "ldap.test.com",
+  "ldap-port": 636,
+  "ldap-search-base": "ou=company.com"
 }
-and is very similar to the one for keycloak.json.
 ```
 
-If both options are specified, only the offline one will be used.
+LDAP Client
+===========
+The build-agent sends a callback on completion to the original caller. The callback needs to be authenticated to be
+accepted by the original caller. To obtain the proper Authorization access token for the callback, use the CLI option:
+```
+-DldapClientConfigFile=<filename>
+```
+
+The filename should have the following content:
+```
+<username>:<password>
+```
+
+If both the ldap and keycloak client config (section below) are specified, the ldap client has precedence.
+
 
 Keycloak Client
 ===============
