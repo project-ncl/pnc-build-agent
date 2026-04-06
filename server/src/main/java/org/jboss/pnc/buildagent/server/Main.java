@@ -74,6 +74,7 @@ public class Main {
         options.addOption(null, "bifrostWaitBeforeRetry",true, "How long to wait before final log upload retry (calculated as: attempt x duration-in-seconds).");
         options.addOption(null, "authHeaderConfig",true, "Path to authHeader config file. Must be set to enable endpoint protection.");
         options.addOption(null, "keycloakClientConfig", true, "Path to Keycloak client config file. Must be set to enable callback authentication");
+        options.addOption(null, "ldapClientConfig", true, "Path to ldap client credentials file. Must be set to enable callback authentication");
         options.addOption(null, "httpReadTimeout", true, "Http client timeout for read operations. The value is number in milliseconds (default is " + DEFAULT_HTTP_READ + "ms).");
         options.addOption(null, "httpWriteTimeout", true, "Http client timeout for write operations. The value is number in milliseconds (default is " + DEFAULT_HTTP_WRITE + "ms).");
         options.addOption("h", false, "Print this help message.");
