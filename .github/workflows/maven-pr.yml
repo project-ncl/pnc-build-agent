@@ -13,12 +13,12 @@ permissions:
 
 on:
   pull_request:
-    branches: [ "*" ]
+    branches: ["*"]
 
 jobs:
-    call-maven-ci:
-      uses: project-ncl/shared-github-actions/.github/workflows/maven-ci.yml@cac5f28c415563ea719d353dd7e04d8904ee696e # main
-      with:
-        # try to force using a Java 8 compiler only to make sure it only compiles with Java 8
-        java_version: 8
-        upload_artifacts: true
+  call-maven-ci:
+    uses: project-ncl/shared-github-actions/.github/workflows/maven-ci.yml@153b97777335953545bc8a907eb5f062af66b7f2 # v0.0.18
+    with:
+      # try to force using a Java 8 compiler only to make sure it only compiles with Java 8
+      java_version: 8
+      upload_artifacts: true
