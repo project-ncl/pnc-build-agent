@@ -436,7 +436,7 @@
         <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-enforcer-plugin</artifactId>
-            <version>3.5.0</version> <!-- Use the latest stable version available -->
+            <version>3.6.2</version> <!-- Use the latest stable version available -->
             <executions>
                 <execution>
                     <id>enforce-bytecode-version</id>
