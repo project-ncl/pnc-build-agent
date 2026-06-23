@@ -281,11 +281,6 @@
       </dependency>
       <dependency>
         <groupId>org.keycloak</groupId>
-        <artifactId>keycloak-servlet-filter-adapter</artifactId>
-        <version>19.0.3</version>
-      </dependency>
-      <dependency>
-        <groupId>org.keycloak</groupId>
         <artifactId>keycloak-authz-client</artifactId>
         <version>25.0.6</version>
       </dependency>

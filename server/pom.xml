@@ -104,10 +104,6 @@
       <artifactId>kafka-clients</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.keycloak</groupId>
-      <artifactId>keycloak-servlet-filter-adapter</artifactId>
-    </dependency>
-    <dependency>
       <groupId>com.unboundid</groupId>
       <artifactId>unboundid-ldapsdk</artifactId>
       <scope>compile</scope>
