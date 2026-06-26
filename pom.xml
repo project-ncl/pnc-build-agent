@@ -32,7 +32,7 @@
 
   <properties>
     <version.io.termd>1.1.11</version.io.termd>
-    <version.undertow>2.2.31.Final</version.undertow>
+    <version.undertow>2.2.39.Final</version.undertow>
     <version.junit>4.13.2</version.junit>
     <version.org.slf4j>1.7.36</version.org.slf4j>
     <version.commons-cli>1.11.0</version.commons-cli>
@@ -262,7 +262,7 @@
       <dependency>
         <groupId>org.apache.kafka</groupId>
         <artifactId>kafka-clients</artifactId>
-        <version>3.9.1</version>
+        <version>3.9.2</version>
       </dependency>
       <dependency>
         <groupId>ch.qos.logback</groupId>
@@ -278,11 +278,6 @@
         <groupId>ch.qos.logback.contrib</groupId>
         <artifactId>logback-json-classic</artifactId>
         <version>${version.logback.contrib}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.keycloak</groupId>
-        <artifactId>keycloak-servlet-filter-adapter</artifactId>
-        <version>19.0.3</version>
       </dependency>
       <dependency>
         <groupId>org.keycloak</groupId>
