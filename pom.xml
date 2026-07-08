@@ -282,7 +282,7 @@
       <dependency>
         <groupId>org.keycloak</groupId>
         <artifactId>keycloak-authz-client</artifactId>
-        <version>25.0.6</version>
+        <version>26.0.8</version>
       </dependency>
       <dependency>
         <groupId>com.unboundid</groupId>
@@ -442,6 +442,13 @@
                         <rules>
                             <enforceBytecodeVersion>
                                 <maxJdkVersion>${maven.compiler.release}</maxJdkVersion>
+                                <!--
+                                    keycloak (>= 26) EdDSA class compiled to Java 15 bytecode;
+                                    never loaded on Java 8 (keycloak falls back at runtime)
+                                -->
+                                <ignoreClasses>
+                                    <ignoreClass>org.keycloak.jose.jwk.EdECUtilsImpl</ignoreClass>
+                                </ignoreClasses>
                             </enforceBytecodeVersion>
                         </rules>
                         <fail>true</fail>
