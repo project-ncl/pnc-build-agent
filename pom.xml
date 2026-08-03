@@ -38,7 +38,6 @@
     <version.commons-cli>1.11.0</version.commons-cli>
     <version.jackson>2.22.1</version.jackson>
     <version.jackson.databind>2.22.1</version.jackson.databind>
-    <version.logback.contrib>0.1.5</version.logback.contrib>
     <version.source.plugin>3.4.0</version.source.plugin>
 
     <jdk.min.version>1.8</jdk.min.version>
@@ -60,7 +59,6 @@
     <module>server</module>
     <module>common</module>
     <module>api</module>
-    <module>logback</module>
   </modules>
 
   <dependencyManagement>
@@ -73,11 +71,6 @@
       <dependency>
         <groupId>org.jboss.pnc.build-agent</groupId>
         <artifactId>api</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.jboss.pnc.build-agent</groupId>
-        <artifactId>logback</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
@@ -263,21 +256,6 @@
         <groupId>org.apache.kafka</groupId>
         <artifactId>kafka-clients</artifactId>
         <version>3.9.2</version>
-      </dependency>
-      <dependency>
-        <groupId>ch.qos.logback</groupId>
-        <artifactId>logback-classic</artifactId>
-        <version>1.2.13</version>
-      </dependency>
-      <dependency>
-        <groupId>ch.qos.logback.contrib</groupId>
-        <artifactId>logback-jackson</artifactId>
-        <version>${version.logback.contrib}</version>
-      </dependency>
-      <dependency>
-        <groupId>ch.qos.logback.contrib</groupId>
-        <artifactId>logback-json-classic</artifactId>
-        <version>${version.logback.contrib}</version>
       </dependency>
       <dependency>
         <groupId>org.keycloak</groupId>
