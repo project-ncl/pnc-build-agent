@@ -30,9 +30,7 @@ import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
-import java.util.Iterator;
 import java.util.Map;
-import java.util.ServiceLoader;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -68,9 +66,7 @@ public class IoQueueLogger implements ReadOnlyChannel {
         this.flushTimeoutMillis = flushTimeoutMillis;
         this.queueAdapter = queueAdapter;
 
-        ServiceLoader<LogFormatter> loader = ServiceLoader.load(LogFormatter.class);
-        Iterator<LogFormatter> iterator = loader.iterator();
-        LogFormatter logFormatter = getLogFormatter(iterator);
+        LogFormatter logFormatter = new JBossFormatter();
 
         Consumer<Exception> exceptionHandler = (e) -> {
             log.error("Error writing log.", e);
@@ -87,20 +83,6 @@ public class IoQueueLogger implements ReadOnlyChannel {
             MDC.setContextMap(logMDC);
             lineConsumer.append(bytes);
         };
-    }
-
-    private LogFormatter getLogFormatter(Iterator<LogFormatter> iterator) throws InstantiationException {
-        LogFormatter logFormatter = null;
-        if (iterator.hasNext()) {
-            logFormatter = iterator.next();
-        }
-        if (iterator.hasNext()) {
-            log.warn("Multiple formatter found, using: " + logFormatter.getClass());
-        }
-        if (logFormatter == null) {
-            logFormatter = new JBossFormatter();
-        }
-        return logFormatter;
     }
 
     @Override
