@@ -48,7 +48,7 @@ import org.jboss.pnc.buildagent.server.servlet.Upload;
 import org.jboss.pnc.buildagent.server.servlet.Welcome;
 import org.jboss.pnc.buildagent.server.termserver.GeneralHeartbeatHttpHeaderProvider;
 import org.jboss.pnc.buildagent.server.termserver.Term;
-import org.jboss.pnc.common.Strings;
+import org.jboss.pnc.buildagent.common.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -329,7 +329,7 @@ public class BootstrapUndertow {
 
     private void configureAuthentication(Options options, DeploymentInfo servletBuilder, String mapping) {
 
-        boolean isAuthHeaderConfigFileNotSpecified = Strings.isEmpty(options.getAuthHeaderConfigFile());
+        boolean isAuthHeaderConfigFileNotSpecified = StringUtils.isEmpty(options.getAuthHeaderConfigFile());
         if (isAuthHeaderConfigFileNotSpecified) {
             log.warn("Endpoint authentication is NOT ENABLED!. Specify auth header config file.");
             return;

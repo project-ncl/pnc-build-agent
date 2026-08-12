@@ -3,7 +3,7 @@ package org.jboss.pnc.buildagent.common.http;
 import org.jboss.pnc.api.dto.HeartbeatConfig;
 import org.jboss.pnc.api.dto.Request;
 import org.jboss.pnc.buildagent.common.concurrent.MDCScheduledThreadPoolExecutor;
-import org.jboss.pnc.common.concurrent.NamedThreadFactory;
+import org.jboss.pnc.buildagent.common.concurrent.NamedThreadFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
