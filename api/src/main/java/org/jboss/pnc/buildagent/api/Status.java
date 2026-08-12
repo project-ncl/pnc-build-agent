@@ -23,12 +23,12 @@ package org.jboss.pnc.buildagent.api;
  */
 public enum Status {
 
-    NEW (false),
-    RUNNING (false),
-    COMPLETED (true),
-    FAILED (true),
+    NEW(false),
+    RUNNING(false),
+    COMPLETED(true),
+    FAILED(true),
     SYSTEM_ERROR(true),
-    INTERRUPTED (true);
+    INTERRUPTED(true);
 
     private final boolean final_;
 

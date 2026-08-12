@@ -18,16 +18,17 @@
 
 package org.jboss.pnc.buildagent.server.termserver;
 
-import io.undertow.websockets.core.WebSocketCallback;
-import io.undertow.websockets.core.WebSocketChannel;
-import io.undertow.websockets.core.WebSockets;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+
 import org.jboss.pnc.buildagent.common.StringLiner;
 import org.jboss.pnc.buildagent.server.ReadOnlyChannel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
+import io.undertow.websockets.core.WebSocketCallback;
+import io.undertow.websockets.core.WebSocketChannel;
+import io.undertow.websockets.core.WebSockets;
 
 /**
  * @author <a href="mailto:matejonnet@gmail.com">Matej Lazar</a>
@@ -70,7 +71,7 @@ public class ReadOnlyWebSocketTextChannel implements ReadOnlyChannel {
         webSocketChannel.sendClose();
     }
 
-    private static class WebSocketCallbackHandler implements WebSocketCallback  {
+    private static class WebSocketCallbackHandler implements WebSocketCallback {
         @Override
         public void complete(WebSocketChannel webSocketChannel, Object o) {
         }

@@ -1,9 +1,12 @@
 package org.jboss.pnc.buildagent.server.termserver;
 
-import io.undertow.websockets.core.WebSocketChannel;
+import java.util.function.Consumer;
+
 import org.jboss.pnc.buildagent.api.TaskStatusUpdateEvent;
 
-import java.util.function.Consumer; /**
+import io.undertow.websockets.core.WebSocketChannel;
+
+/**
  * @author <a href="mailto:matejonnet@gmail.com">Matej Lazar</a>
  */
 public class TaskStatusUpdateListener {

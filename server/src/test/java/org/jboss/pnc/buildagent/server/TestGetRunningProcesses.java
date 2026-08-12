@@ -18,6 +18,12 @@
 
 package org.jboss.pnc.buildagent.server;
 
+import java.util.Optional;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
+
 import org.jboss.pnc.buildagent.api.Status;
 import org.jboss.pnc.buildagent.api.TaskStatusUpdateEvent;
 import org.jboss.pnc.buildagent.client.BuildAgentClient;
@@ -30,12 +36,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Optional;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
 
 /**
  * @author <a href="mailto:matejonnet@gmail.com">Matej Lazar</a>
@@ -79,7 +79,11 @@ public class TestGetRunningProcesses {
         //http client does not create active terminal on connect
         BuildAgentClient buildAgentHttpClient = new BuildAgentHttpClient(configuration);
         Assert.assertEquals(0, buildAgentHttpClient.getRunningProcesses().get(3, TimeUnit.SECONDS).size());
-        BuildAgentClient buildAgentClient = new BuildAgentSocketClient(terminalUrl, Optional.empty(), onStatusUpdate, context);
+        BuildAgentClient buildAgentClient = new BuildAgentSocketClient(
+                terminalUrl,
+                Optional.empty(),
+                onStatusUpdate,
+                context);
         Assert.assertEquals(1, buildAgentHttpClient.getRunningProcesses().get(3, TimeUnit.SECONDS).size());
 
         buildAgentClient.execute(TEST_COMMAND);

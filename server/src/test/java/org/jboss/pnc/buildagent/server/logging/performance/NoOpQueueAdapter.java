@@ -1,9 +1,9 @@
 package org.jboss.pnc.buildagent.server.logging.performance;
 
-import org.jboss.pnc.buildagent.server.QueueAdapter;
-
 import java.time.Duration;
 import java.util.function.Consumer;
+
+import org.jboss.pnc.buildagent.server.QueueAdapter;
 
 /**
  * @author <a href="mailto:matejonnet@gmail.com">Matej Lazar</a>

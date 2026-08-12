@@ -1,12 +1,11 @@
 package org.jboss.pnc.buildagent.client;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.jboss.logging.Logger;
-import org.jboss.pnc.api.dto.Request;
-import org.jboss.pnc.buildagent.api.httpinvoke.RetryConfig;
-import org.jboss.pnc.buildagent.common.StringUtils;
-import org.jboss.pnc.buildagent.common.http.HttpClient;
+import static org.jboss.pnc.api.dto.Request.Method.GET;
+import static org.jboss.pnc.api.dto.Request.Method.HEAD;
+import static org.jboss.pnc.api.dto.Request.Method.PUT;
+import static org.jboss.pnc.buildagent.api.Constants.FILE_DOWNLOAD_PATH;
+import static org.jboss.pnc.buildagent.api.Constants.FILE_UPLOAD_PATH;
+import static org.jboss.pnc.buildagent.api.Constants.RUNNING_PROCESSES;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -26,12 +25,14 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import static org.jboss.pnc.api.dto.Request.Method.GET;
-import static org.jboss.pnc.api.dto.Request.Method.HEAD;
-import static org.jboss.pnc.api.dto.Request.Method.PUT;
-import static org.jboss.pnc.buildagent.api.Constants.FILE_DOWNLOAD_PATH;
-import static org.jboss.pnc.buildagent.api.Constants.FILE_UPLOAD_PATH;
-import static org.jboss.pnc.buildagent.api.Constants.RUNNING_PROCESSES;
+import org.jboss.logging.Logger;
+import org.jboss.pnc.api.dto.Request;
+import org.jboss.pnc.buildagent.api.httpinvoke.RetryConfig;
+import org.jboss.pnc.buildagent.common.StringUtils;
+import org.jboss.pnc.buildagent.common.http.HttpClient;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * @author <a href="mailto:matejonnet@gmail.com">Matej Lazar</a>
@@ -93,9 +94,11 @@ public abstract class BuildAgentClientBase implements Closeable {
     }
 
     /**
-     * It is preferable to use a single instance of a HttpClient for all the BuildAgentClients because of the HttpClient's
+     * It is preferable to use a single instance of a HttpClient for all the BuildAgentClients because of the
+     * HttpClient's
      * internal thread pool.
-     *  @param httpClient
+     * 
+     * @param httpClient
      * @param termBaseUrl
      * @param livenessResponseTimeout
      * @param requestHeaders
@@ -140,7 +143,8 @@ public abstract class BuildAgentClientBase implements Closeable {
 
     public boolean isServerAlive() {
         CompletableFuture<HttpClient.Response> responseFuture = getHttpClient().invoke(
-                new Request(HEAD, livenessProbeLocation, requestHeaders), "");
+                new Request(HEAD, livenessProbeLocation, requestHeaders),
+                "");
         try {
             HttpClient.Response response = responseFuture.get(livenessResponseTimeout, TimeUnit.MILLISECONDS);
             boolean isSuccess = response.getCode() == 200;
@@ -164,14 +168,15 @@ public abstract class BuildAgentClientBase implements Closeable {
             ByteBuffer buffer,
             Path remoteFilePath) {
         return getUri(fileUploadUrl.toString() + remoteFilePath.toString())
-                .thenCompose(uri -> getHttpClient().invoke(
-                        new Request(PUT, uri, requestHeaders),
-                        buffer,
-                        retryConfig.getMaxRetries(),
-                        retryConfig.getWaitBeforeRetry(),
-                        -1L,
-                        0,
-                        0));
+                .thenCompose(
+                        uri -> getHttpClient().invoke(
+                                new Request(PUT, uri, requestHeaders),
+                                buffer,
+                                retryConfig.getMaxRetries(),
+                                retryConfig.getWaitBeforeRetry(),
+                                -1L,
+                                0,
+                                0));
     }
 
     public CompletableFuture<HttpClient.Response> downloadFile(
@@ -183,37 +188,39 @@ public abstract class BuildAgentClientBase implements Closeable {
             Path remoteFilePath,
             long maxDownloadSize) {
         return getUri(fileDownloadUrl + remoteFilePath.toString())
-                .thenCompose(uri -> getHttpClient().invoke(
-                        new Request(GET, uri, requestHeaders),
-                        ByteBuffer.allocate(0),
-                        retryConfig.getMaxRetries(),
-                        retryConfig.getWaitBeforeRetry(),
-                        maxDownloadSize,
-                        0,
-                        0
-                ));
+                .thenCompose(
+                        uri -> getHttpClient().invoke(
+                                new Request(GET, uri, requestHeaders),
+                                ByteBuffer.allocate(0),
+                                retryConfig.getMaxRetries(),
+                                retryConfig.getWaitBeforeRetry(),
+                                maxDownloadSize,
+                                0,
+                                0));
     }
 
     public CompletableFuture<Set<String>> getRunningProcesses() {
         return getUri(processListUrl.toString())
-                .thenCompose(uri -> getHttpClient().invoke(
-                        new Request(GET, uri, requestHeaders),
-                        ByteBuffer.allocate(0),
-                        retryConfig.getMaxRetries(),
-                        retryConfig.getWaitBeforeRetry(),
-                        -1L,
-                        0,
-                        0
-                ))
+                .thenCompose(
+                        uri -> getHttpClient().invoke(
+                                new Request(GET, uri, requestHeaders),
+                                ByteBuffer.allocate(0),
+                                retryConfig.getMaxRetries(),
+                                retryConfig.getWaitBeforeRetry(),
+                                -1L,
+                                0,
+                                0))
                 .thenApply(response -> {
                     if (response.getCode() == 200) {
-                        TypeReference<Set<String>> typeRef = new TypeReference<Set<String>>() {};
+                        TypeReference<Set<String>> typeRef = new TypeReference<Set<String>>() {
+                        };
                         try {
                             return objectMapper.readValue(response.getStringResult().getString(), typeRef);
                         } catch (IOException e) {
                             throw new CompletionException(
                                     new BuildAgentClientException(
-                                            "Cannot read running processes response.", e));
+                                            "Cannot read running processes response.",
+                                            e));
                         }
                     } else {
                         throw new CompletionException(

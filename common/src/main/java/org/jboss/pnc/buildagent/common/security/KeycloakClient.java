@@ -18,13 +18,13 @@
 
 package org.jboss.pnc.buildagent.common.security;
 
+import java.util.Collections;
+
 import org.apache.http.impl.client.HttpClients;
 import org.keycloak.authorization.client.AuthzClient;
 import org.keycloak.authorization.client.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Collections;
 
 /**
  * KeycloakClient to get an access token from the OIDC server to send to authenticated endpoints.
@@ -42,7 +42,13 @@ public class KeycloakClient {
     private final String trustboxUrl;
     private final boolean useTrustbox;
 
-    public KeycloakClient(String url, String realm, String clientId, String clientSecret, String trustboxUrl, boolean useTrustbox) {
+    public KeycloakClient(
+            String url,
+            String realm,
+            String clientId,
+            String clientSecret,
+            String trustboxUrl,
+            boolean useTrustbox) {
         this.url = url;
         this.realm = realm;
         this.clientId = clientId;
@@ -56,12 +62,13 @@ public class KeycloakClient {
         this.realm = configuration.getRealm();
         this.clientId = configuration.getClientId();
         this.clientSecret = configuration.getClientSecret();
-        this.trustboxUrl =configuration.getTrustboxUrl();
+        this.trustboxUrl = configuration.getTrustboxUrl();
         this.useTrustbox = configuration.isUseTrustbox();
     }
 
     /**
      * Get a fresh access token from the OIDC server
+     * 
      * @return access token
      */
     public String getBearerAccessToken() {

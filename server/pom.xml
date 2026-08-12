@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
@@ -147,12 +148,8 @@
               <index>true</index>
               <manifest>
                 <mainClass>org.jboss.pnc.buildagent.server.Main</mainClass>
-                <addDefaultSpecificationEntries>
-                  true
-                </addDefaultSpecificationEntries>
-                <addDefaultImplementationEntries>
-                  true
-                </addDefaultImplementationEntries>
+                <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+                <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
               </manifest>
               <manifestEntries>
                 <Implementation-URL>${project.url}</Implementation-URL>
@@ -174,10 +171,10 @@
           <executions>
             <execution>
               <id>make-assembly</id>
-              <phase>prepare-package</phase>
               <goals>
                 <goal>single</goal>
               </goals>
+              <phase>prepare-package</phase>
             </execution>
           </executions>
         </plugin>

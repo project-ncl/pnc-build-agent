@@ -1,5 +1,10 @@
 package org.jboss.pnc.buildagent.server;
 
+import java.time.Duration;
+import java.util.Properties;
+import java.util.Random;
+import java.util.function.Consumer;
+
 import org.apache.kafka.clients.producer.Callback;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -7,11 +12,6 @@ import org.jboss.pnc.api.constants.MDCKeys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
-
-import java.time.Duration;
-import java.util.Properties;
-import java.util.Random;
-import java.util.function.Consumer;
 
 /**
  * @author <a href="mailto:matejonnet@gmail.com">Matej Lazar</a>
@@ -61,7 +61,10 @@ public class KafkaQueueAdapter implements QueueAdapter {
                 exceptionHandler.accept(exception);
             } else {
                 if (log.isTraceEnabled()) {
-                    log.trace("Message sent to Kafka. Partition:{}, timestamp {}.", metadata.partition(), metadata.timestamp());
+                    log.trace(
+                            "Message sent to Kafka. Partition:{}, timestamp {}.",
+                            metadata.partition(),
+                            metadata.timestamp());
                 }
             }
         };

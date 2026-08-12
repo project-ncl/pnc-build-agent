@@ -1,10 +1,10 @@
 package org.jboss.pnc.buildagent.server.httpinvoker;
 
+import java.util.function.Consumer;
+
 import io.undertow.servlet.api.InstanceFactory;
 import io.undertow.servlet.api.InstanceHandle;
 import io.undertow.servlet.util.ImmediateInstanceHandle;
-
-import java.util.function.Consumer;
 
 /**
  * @author <a href="mailto:matejonnet@gmail.com">Matej Lazar</a>

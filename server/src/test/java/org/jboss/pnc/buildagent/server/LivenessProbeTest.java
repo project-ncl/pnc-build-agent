@@ -1,13 +1,13 @@
 package org.jboss.pnc.buildagent.server;
 
+import static org.jboss.pnc.buildagent.server.TermdServer.HOST;
+
 import org.jboss.pnc.api.dto.Request;
 import org.jboss.pnc.buildagent.client.BuildAgentClientException;
 import org.jboss.pnc.buildagent.client.BuildAgentHttpClient;
 import org.jboss.pnc.buildagent.client.HttpClientConfiguration;
 import org.junit.Assert;
 import org.junit.Test;
-
-import static org.jboss.pnc.buildagent.server.TermdServer.HOST;
 
 /**
  * @author <a href="mailto:matejonnet@gmail.com">Matej Lazar</a>

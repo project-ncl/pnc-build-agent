@@ -1,14 +1,15 @@
 package org.jboss.pnc.buildagent.server.httpinvoker;
 
-import io.termd.core.pty.PtyMaster;
-import org.jboss.pnc.buildagent.server.ReadOnlyChannel;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Set;
 import java.util.UUID;
+
+import org.jboss.pnc.buildagent.server.ReadOnlyChannel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import io.termd.core.pty.PtyMaster;
 
 /**
  * @author <a href="mailto:matejonnet@gmail.com">Matej Lazar</a>
@@ -20,7 +21,6 @@ public class CommandSession {
     private final String sessionId;
     private final Set<ReadOnlyChannel> readOnlyChannels;
     private PtyMaster ptyMaster;
-
 
     public CommandSession(Set<ReadOnlyChannel> readOnlyChannels) {
         this.sessionId = UUID.randomUUID().toString();
@@ -49,7 +49,10 @@ public class CommandSession {
 
     public void handleOutput(byte[] buffer) {
         for (ReadOnlyChannel readOnlyChannel : readOnlyChannels) {
-            LOGGER.trace("Writing to chanel {}; stdout: {}", readOnlyChannel, new String(buffer, StandardCharsets.UTF_8));
+            LOGGER.trace(
+                    "Writing to chanel {}; stdout: {}",
+                    readOnlyChannel,
+                    new String(buffer, StandardCharsets.UTF_8));
             readOnlyChannel.writeOutput(buffer);
         }
     }

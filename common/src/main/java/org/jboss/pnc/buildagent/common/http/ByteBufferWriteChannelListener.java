@@ -18,16 +18,16 @@
 
 package org.jboss.pnc.buildagent.common.http;
 
-import io.undertow.UndertowLogger;
-import io.undertow.util.StringWriteChannelListener;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
+
 import org.xnio.ChannelListener;
 import org.xnio.ChannelListeners;
 import org.xnio.IoUtils;
 import org.xnio.channels.StreamSinkChannel;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
+import io.undertow.UndertowLogger;
 
 /**
  * Based on io.undertow.util.{@link io.undertow.util.StringWriteChannelListener}.
@@ -44,15 +44,15 @@ public class ByteBufferWriteChannelListener implements ChannelListener<StreamSin
 
     private final ByteBuffer buffer;
 
-    public ByteBufferWriteChannelListener( final String string) {
+    public ByteBufferWriteChannelListener(final String string) {
         this(string, Charset.defaultCharset());
     }
 
-    public ByteBufferWriteChannelListener( final String string, Charset charset) {
+    public ByteBufferWriteChannelListener(final String string, Charset charset) {
         buffer = ByteBuffer.wrap(string.getBytes(charset));
     }
 
-    public ByteBufferWriteChannelListener( final ByteBuffer buffer) {
+    public ByteBufferWriteChannelListener(final ByteBuffer buffer) {
         this.buffer = buffer;
     }
 
@@ -105,12 +105,13 @@ public class ByteBufferWriteChannelListener implements ChannelListener<StreamSin
             channel.shutdownWrites();
 
             if (!channel.flush()) {
-                channel.getWriteSetter().set(ChannelListeners.flushingChannelListener(new ChannelListener<StreamSinkChannel>() {
-                    @Override
-                    public void handleEvent(StreamSinkChannel o) {
-                        IoUtils.safeClose(channel);
-                    }
-                }, ChannelListeners.closingChannelExceptionHandler()));
+                channel.getWriteSetter()
+                        .set(ChannelListeners.flushingChannelListener(new ChannelListener<StreamSinkChannel>() {
+                            @Override
+                            public void handleEvent(StreamSinkChannel o) {
+                                IoUtils.safeClose(channel);
+                            }
+                        }, ChannelListeners.closingChannelExceptionHandler()));
                 channel.resumeWrites();
 
             }

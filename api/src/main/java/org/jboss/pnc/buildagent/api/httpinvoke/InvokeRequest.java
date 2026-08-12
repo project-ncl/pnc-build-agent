@@ -1,13 +1,14 @@
 package org.jboss.pnc.buildagent.api.httpinvoke;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
-import org.jboss.pnc.api.dto.HeartbeatConfig;
-import org.jboss.pnc.api.dto.Request;
-
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Collections;
+
+import org.jboss.pnc.api.dto.HeartbeatConfig;
+import org.jboss.pnc.api.dto.Request;
+
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 
 /**
  * @author <a href="mailto:matejonnet@gmail.com">Matej Lazar</a>
@@ -32,7 +33,10 @@ public class InvokeRequest {
         this.command = command;
         heartbeatConfig = null;
         try {
-            this.callback = new Request(Request.Method.valueOf(callbackMethod), callbackUrl.toURI(), Collections.emptyList());
+            this.callback = new Request(
+                    Request.Method.valueOf(callbackMethod),
+                    callbackUrl.toURI(),
+                    Collections.emptyList());
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }

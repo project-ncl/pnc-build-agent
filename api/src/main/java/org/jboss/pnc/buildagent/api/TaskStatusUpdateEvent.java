@@ -18,14 +18,15 @@
 
 package org.jboss.pnc.buildagent.api;
 
+import java.io.Serializable;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.Serializable;
 
 /**
  * @author <a href="mailto:matejonnet@gmail.com">Matej Lazar</a>
@@ -33,148 +34,153 @@ import java.io.Serializable;
 @JsonDeserialize(builder = TaskStatusUpdateEvent.Builder.class)
 public class TaskStatusUpdateEvent implements Serializable {
 
-  private static final Logger log = LoggerFactory.getLogger(TaskStatusUpdateEvent.class);
+    private static final Logger log = LoggerFactory.getLogger(TaskStatusUpdateEvent.class);
 
-  private final String taskId;
-  private final Status newStatus;
-  private final String outputChecksum;
-  private final String message;
-  private final Object context;
+    private final String taskId;
+    private final Status newStatus;
+    private final String outputChecksum;
+    private final String message;
+    private final Object context;
 
-  @Deprecated
-  private final Status oldStatus;
+    @Deprecated
+    private final Status oldStatus;
 
-  @Deprecated
-  public TaskStatusUpdateEvent(String taskId, Status oldStatus, Status newStatus, String context, String outputChecksum) {
-    this.taskId = taskId;
-    this.oldStatus = oldStatus;
-    this.newStatus = newStatus;
-    this.context = context;
-    this.outputChecksum = outputChecksum;
-    this.message = "";
-  }
-
-  @Deprecated
-  public TaskStatusUpdateEvent(String taskId, Status oldStatus, Status newStatus, String context) {
-    this.taskId = taskId;
-    this.oldStatus = oldStatus;
-    this.newStatus = newStatus;
-    this.context = context;
-    this.outputChecksum = "";
-    this.message = "";
-  }
-
-  private TaskStatusUpdateEvent(Builder builder) {
-    taskId = builder.taskId;
-    newStatus = builder.newStatus;
-    outputChecksum = builder.outputChecksum;
-    message = builder.message;
-    oldStatus = builder.oldStatus;
-    context = builder.context;
-  }
-
-  public static Builder newBuilder() {
-    return new Builder();
-  }
-
-  public static Builder newBuilder(TaskStatusUpdateEvent copy) {
-    Builder builder = new Builder();
-    builder.taskId = copy.getTaskId();
-    builder.newStatus = copy.getNewStatus();
-    builder.outputChecksum = copy.getOutputChecksum();
-    builder.message = copy.getMessage();
-    builder.oldStatus = copy.getOldStatus();
-    builder.context = copy.getContext();
-    return builder;
-  }
-
-  public String getTaskId() {
-    return taskId;
-  }
-
-  @Deprecated
-  public Status getOldStatus() {
-    return oldStatus;
-  }
-
-  public Status getNewStatus() {
-    return newStatus;
-  }
-
-  public Object getContext() {
-    return context;
-  }
-
-  public String getOutputChecksum() {
-    return outputChecksum;
-  }
-
-  public String getMessage() {
-    return message;
-  }
-
-  public String toString() {
-    ObjectMapper mapper = new ObjectMapper();
-    try {
-      return mapper.writeValueAsString(this);
-    } catch (JsonProcessingException e) {
-      log.error("Cannot serialize object.", e);
-    }
-    return null;
-  }
-
-  @JsonPOJOBuilder(withPrefix = "")
-  public static final class Builder {
-
-    private String taskId;
-
-    private Status newStatus;
-
-    private String outputChecksum;
-
-    private String message;
-
-    private Status oldStatus;
-
-    private Object context;
-
-    private Builder() {
-    }
-
-    public Builder taskId(String taskId) {
-      this.taskId = taskId;
-      return this;
-    }
-
-    public Builder newStatus(Status newStatus) {
-      this.newStatus = newStatus;
-      return this;
-    }
-
-    public Builder outputChecksum(String outputChecksum) {
-      this.outputChecksum = outputChecksum;
-      return this;
-    }
-
-    public Builder message(String message) {
-      this.message = message;
-      return this;
-    }
-
-    public Builder context(Object context) {
-      this.context = context;
-      return this;
+    @Deprecated
+    public TaskStatusUpdateEvent(
+            String taskId,
+            Status oldStatus,
+            Status newStatus,
+            String context,
+            String outputChecksum) {
+        this.taskId = taskId;
+        this.oldStatus = oldStatus;
+        this.newStatus = newStatus;
+        this.context = context;
+        this.outputChecksum = outputChecksum;
+        this.message = "";
     }
 
     @Deprecated
-    public Builder oldStatus(Status oldStatus) {
-      this.oldStatus = oldStatus;
-      return this;
+    public TaskStatusUpdateEvent(String taskId, Status oldStatus, Status newStatus, String context) {
+        this.taskId = taskId;
+        this.oldStatus = oldStatus;
+        this.newStatus = newStatus;
+        this.context = context;
+        this.outputChecksum = "";
+        this.message = "";
     }
 
-    public TaskStatusUpdateEvent build() {
-      return new TaskStatusUpdateEvent(this);
+    private TaskStatusUpdateEvent(Builder builder) {
+        taskId = builder.taskId;
+        newStatus = builder.newStatus;
+        outputChecksum = builder.outputChecksum;
+        message = builder.message;
+        oldStatus = builder.oldStatus;
+        context = builder.context;
     }
-  }
+
+    public static Builder newBuilder() {
+        return new Builder();
+    }
+
+    public static Builder newBuilder(TaskStatusUpdateEvent copy) {
+        Builder builder = new Builder();
+        builder.taskId = copy.getTaskId();
+        builder.newStatus = copy.getNewStatus();
+        builder.outputChecksum = copy.getOutputChecksum();
+        builder.message = copy.getMessage();
+        builder.oldStatus = copy.getOldStatus();
+        builder.context = copy.getContext();
+        return builder;
+    }
+
+    public String getTaskId() {
+        return taskId;
+    }
+
+    @Deprecated
+    public Status getOldStatus() {
+        return oldStatus;
+    }
+
+    public Status getNewStatus() {
+        return newStatus;
+    }
+
+    public Object getContext() {
+        return context;
+    }
+
+    public String getOutputChecksum() {
+        return outputChecksum;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public String toString() {
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            return mapper.writeValueAsString(this);
+        } catch (JsonProcessingException e) {
+            log.error("Cannot serialize object.", e);
+        }
+        return null;
+    }
+
+    @JsonPOJOBuilder(withPrefix = "")
+    public static final class Builder {
+
+        private String taskId;
+
+        private Status newStatus;
+
+        private String outputChecksum;
+
+        private String message;
+
+        private Status oldStatus;
+
+        private Object context;
+
+        private Builder() {
+        }
+
+        public Builder taskId(String taskId) {
+            this.taskId = taskId;
+            return this;
+        }
+
+        public Builder newStatus(Status newStatus) {
+            this.newStatus = newStatus;
+            return this;
+        }
+
+        public Builder outputChecksum(String outputChecksum) {
+            this.outputChecksum = outputChecksum;
+            return this;
+        }
+
+        public Builder message(String message) {
+            this.message = message;
+            return this;
+        }
+
+        public Builder context(Object context) {
+            this.context = context;
+            return this;
+        }
+
+        @Deprecated
+        public Builder oldStatus(Status oldStatus) {
+            this.oldStatus = oldStatus;
+            return this;
+        }
+
+        public TaskStatusUpdateEvent build() {
+            return new TaskStatusUpdateEvent(this);
+        }
+    }
 
 }

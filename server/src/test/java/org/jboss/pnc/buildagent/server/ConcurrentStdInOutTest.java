@@ -1,15 +1,5 @@
 package org.jboss.pnc.buildagent.server;
 
-import org.jboss.pnc.buildagent.api.TaskStatusUpdateEvent;
-import org.jboss.pnc.buildagent.client.BuildAgentSocketClient;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -24,6 +14,15 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+
+import org.jboss.pnc.buildagent.api.TaskStatusUpdateEvent;
+import org.jboss.pnc.buildagent.client.BuildAgentSocketClient;
+import org.junit.AfterClass;
+import org.junit.Assert;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author <a href="mailto:matejonnet@gmail.com">Matej Lazar</a>
@@ -75,7 +74,7 @@ public class ConcurrentStdInOutTest {
         public void run() {
             try {
                 BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
-                for (String line; (line = reader.readLine()) != null; ) {
+                for (String line; (line = reader.readLine()) != null;) {
                     System.out.println(line);
                 }
             } catch (IOException e) {
@@ -84,12 +83,11 @@ public class ConcurrentStdInOutTest {
         }
     }
 
-
     @Test
     public void shouldNotMixStdInAndStdoutLines() throws Throwable {
         String longMessage = createLongMessage();
-//        String TEST_COMMAND = "java -cp ./target/test-classes/:./server/target/test-classes/ org.jboss.pnc.buildagent.server.MockProcess 1 0 " + longMessage + "";
-//        String TEST_COMMAND = "pwd";
+        //        String TEST_COMMAND = "java -cp ./target/test-classes/:./server/target/test-classes/ org.jboss.pnc.buildagent.server.MockProcess 1 0 " + longMessage + "";
+        //        String TEST_COMMAND = "pwd";
         URL scriptResource = ConcurrentStdInOutTest.class.getResource("/testscript.sh");
         String TEST_COMMAND = Paths.get(scriptResource.toURI()).toAbsolutePath().toString();
 
@@ -106,7 +104,11 @@ public class ConcurrentStdInOutTest {
         Consumer<String> responseConsumer = s -> {
             responses.add(s);
         };
-        BuildAgentSocketClient buildAgentClient = new BuildAgentSocketClient(terminalUrl, Optional.of(responseConsumer), onStatusUpdate, context);
+        BuildAgentSocketClient buildAgentClient = new BuildAgentSocketClient(
+                terminalUrl,
+                Optional.of(responseConsumer),
+                onStatusUpdate,
+                context);
         buildAgentClient.executeCommand(TEST_COMMAND);
 
         String received = queue.poll(5, TimeUnit.SECONDS);
@@ -122,7 +124,9 @@ public class ConcurrentStdInOutTest {
         int commandInputIndex = responses.indexOf("+ echo abc");
         int commandOutputIndex = responses.indexOf("abc");
 
-        Assert.assertTrue("Command input have to be printed before its output.", commandOutputIndex > commandInputIndex);
+        Assert.assertTrue(
+                "Command input have to be printed before its output.",
+                commandOutputIndex > commandInputIndex);
     }
 
     private String createLongMessage() {

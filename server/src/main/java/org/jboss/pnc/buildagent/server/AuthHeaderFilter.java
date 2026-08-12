@@ -1,6 +1,10 @@
 package org.jboss.pnc.buildagent.server;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
+import java.util.logging.Logger;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -10,11 +14,8 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.File;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
-import java.util.logging.Logger;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Alternative implementation of KeycloakOIDCFilter, which does not use the .well-known/openid-configuration endpoint
@@ -41,7 +42,8 @@ public class AuthHeaderFilter implements Filter {
     }
 
     @Override
-    public void doFilter(ServletRequest req, ServletResponse res, FilterChain filterChain) throws IOException, ServletException {
+    public void doFilter(ServletRequest req, ServletResponse res, FilterChain filterChain)
+            throws IOException, ServletException {
 
         HttpServletRequest request = (HttpServletRequest) req;
         HttpServletResponse response = (HttpServletResponse) res;
@@ -51,7 +53,8 @@ public class AuthHeaderFilter implements Filter {
             // OIDC Authentication
             String authToken = authHeader.replace("Bearer", "").trim();
             try {
-                OidcOfflineTokenVerifier.verify(authToken, configuration.getRealmPublicKey(), configuration.getAuthServerUrl());
+                OidcOfflineTokenVerifier
+                        .verify(authToken, configuration.getRealmPublicKey(), configuration.getAuthServerUrl());
 
                 // all good, no exceptions thrown.
                 filterChain.doFilter(req, res);
@@ -65,7 +68,9 @@ public class AuthHeaderFilter implements Filter {
             // Basic LDAP authentication: values is <username>:<password> base64 encoded. so we need to do the reverse
             // to extract the username and password
             String base64EncodedValue = authHeader.replace("Basic", "").trim();
-            String usernameAndPassword = new String(Base64.getDecoder().decode(base64EncodedValue), StandardCharsets.UTF_8);
+            String usernameAndPassword = new String(
+                    Base64.getDecoder().decode(base64EncodedValue),
+                    StandardCharsets.UTF_8);
             String[] splitUsernameAndPassword = usernameAndPassword.split(":");
 
             String username;
@@ -94,7 +99,6 @@ public class AuthHeaderFilter implements Filter {
             return;
         }
     }
-
 
     @Override
     public void destroy() {

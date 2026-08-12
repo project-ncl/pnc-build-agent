@@ -1,12 +1,12 @@
 package org.jboss.pnc.buildagent.client;
 
-import org.jboss.pnc.api.dto.HeartbeatConfig;
-import org.jboss.pnc.api.dto.Request;
-import org.jboss.pnc.buildagent.api.httpinvoke.RetryConfig;
-
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+
+import org.jboss.pnc.api.dto.HeartbeatConfig;
+import org.jboss.pnc.api.dto.Request;
+import org.jboss.pnc.buildagent.api.httpinvoke.RetryConfig;
 
 /**
  * @author <a href="mailto:matejonnet@gmail.opecom">Matej Lazar</a>

@@ -18,25 +18,24 @@
 
 package org.jboss.pnc.buildagent.server.websockets;
 
-import org.jboss.pnc.buildagent.server.TermdServer;
-import org.jboss.pnc.buildagent.api.ResponseMode;
-import org.jboss.pnc.buildagent.api.Status;
-import org.jboss.pnc.buildagent.api.TaskStatusUpdateEvent;
-import org.jboss.pnc.buildagent.client.BuildAgentSocketClient;
-import org.jboss.pnc.buildagent.common.ObjectWrapper;
-import org.jboss.pnc.buildagent.common.Wait;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.File;
 import java.nio.file.Paths;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 import java.util.function.Consumer;
 
+import org.jboss.pnc.buildagent.api.ResponseMode;
+import org.jboss.pnc.buildagent.api.Status;
+import org.jboss.pnc.buildagent.api.TaskStatusUpdateEvent;
+import org.jboss.pnc.buildagent.client.BuildAgentSocketClient;
+import org.jboss.pnc.buildagent.common.ObjectWrapper;
+import org.jboss.pnc.buildagent.common.Wait;
+import org.jboss.pnc.buildagent.server.TermdServer;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author <a href="mailto:matejonnet@gmail.com">Matej Lazar</a>
@@ -77,7 +76,13 @@ public class TestWebSocketConnectionWithBindPath {
                 completed.set(true);
             }
         };
-        BuildAgentSocketClient buildAgentClient = new BuildAgentSocketClient(terminalBaseUrl, Optional.empty(), onStatusUpdate, context, ResponseMode.BINARY, false);
+        BuildAgentSocketClient buildAgentClient = new BuildAgentSocketClient(
+                terminalBaseUrl,
+                Optional.empty(),
+                onStatusUpdate,
+                context,
+                ResponseMode.BINARY,
+                false);
         buildAgentClient.executeCommand(TEST_COMMAND);
 
         Thread.sleep(1000); //make sure async command execution started
@@ -95,8 +100,16 @@ public class TestWebSocketConnectionWithBindPath {
                 ResponseMode.BINARY,
                 false);
 
-        Wait.forCondition(() -> completed.get(), 5, ChronoUnit.SECONDS, "Operation did not complete within given timeout.");
-        Wait.forCondition(() -> response.toString().contains("I'm done."), 3, ChronoUnit.SECONDS, "Missing or invalid response: " + response.toString());
+        Wait.forCondition(
+                () -> completed.get(),
+                5,
+                ChronoUnit.SECONDS,
+                "Operation did not complete within given timeout.");
+        Wait.forCondition(
+                () -> response.toString().contains("I'm done."),
+                3,
+                ChronoUnit.SECONDS,
+                "Missing or invalid response: " + response.toString());
 
         buildAgentClientReconnected.close();
     }
@@ -111,7 +124,13 @@ public class TestWebSocketConnectionWithBindPath {
                 completed.set(true);
             }
         };
-        BuildAgentSocketClient buildAgentClient = new BuildAgentSocketClient(terminalBaseUrl, Optional.empty(), onStatusUpdate, context, ResponseMode.BINARY, false);
+        BuildAgentSocketClient buildAgentClient = new BuildAgentSocketClient(
+                terminalBaseUrl,
+                Optional.empty(),
+                onStatusUpdate,
+                context,
+                ResponseMode.BINARY,
+                false);
         buildAgentClient.executeCommand(TEST_COMMAND);
 
         Thread.sleep(1000); //make sure async command execution started
@@ -129,8 +148,16 @@ public class TestWebSocketConnectionWithBindPath {
                 ResponseMode.TEXT,
                 false);
 
-        Wait.forCondition(() -> completed.get(), 5, ChronoUnit.SECONDS, "Operation did not complete within given timeout.");
-        Wait.forCondition(() -> response.toString().contains("I'm done."), 3, ChronoUnit.SECONDS, "Missing or invalid response: " + response.toString());
+        Wait.forCondition(
+                () -> completed.get(),
+                5,
+                ChronoUnit.SECONDS,
+                "Operation did not complete within given timeout.");
+        Wait.forCondition(
+                () -> response.toString().contains("I'm done."),
+                3,
+                ChronoUnit.SECONDS,
+                "Missing or invalid response: " + response.toString());
 
         buildAgentClientReconnected.close();
     }

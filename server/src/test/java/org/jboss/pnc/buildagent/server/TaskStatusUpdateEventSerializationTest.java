@@ -18,7 +18,8 @@
 
 package org.jboss.pnc.buildagent.server;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
+
 import org.jboss.pnc.buildagent.api.Status;
 import org.jboss.pnc.buildagent.api.TaskStatusUpdateEvent;
 import org.junit.Assert;
@@ -26,7 +27,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * @author <a href="mailto:matejonnet@gmail.com">Matej Lazar</a>
@@ -38,14 +39,19 @@ public class TaskStatusUpdateEventSerializationTest {
     @Test
     public void testTaskStatusUpdateEventSerialization() throws IOException {
 
-        TaskStatusUpdateEvent taskStatusUpdateEvent = new TaskStatusUpdateEvent("123456", Status.NEW, Status.RUNNING, "ctx");
+        TaskStatusUpdateEvent taskStatusUpdateEvent = new TaskStatusUpdateEvent(
+                "123456",
+                Status.NEW,
+                Status.RUNNING,
+                "ctx");
 
         String taskId = taskStatusUpdateEvent.getTaskId();
 
         String serialized = taskStatusUpdateEvent.toString();
         log.info("Serialized : {}", serialized);
         ObjectMapper mapper = new ObjectMapper();
-        TaskStatusUpdateEvent deserializedTaskStatusUpdateEvent = mapper.readValue(serialized, TaskStatusUpdateEvent.class);
+        TaskStatusUpdateEvent deserializedTaskStatusUpdateEvent = mapper
+                .readValue(serialized, TaskStatusUpdateEvent.class);
 
         Assert.assertEquals(taskId, deserializedTaskStatusUpdateEvent.getTaskId());
     }

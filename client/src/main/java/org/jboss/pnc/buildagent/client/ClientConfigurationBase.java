@@ -1,9 +1,9 @@
 package org.jboss.pnc.buildagent.client;
 
+import java.util.List;
+
 import org.jboss.pnc.api.dto.Request;
 import org.jboss.pnc.buildagent.api.httpinvoke.RetryConfig;
-
-import java.util.List;
 
 /**
  * @author <a href="mailto:matejonnet@gmail.opecom">Matej Lazar</a>

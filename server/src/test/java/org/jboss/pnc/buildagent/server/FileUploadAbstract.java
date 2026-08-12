@@ -18,13 +18,6 @@
 
 package org.jboss.pnc.buildagent.server;
 
-import org.jboss.pnc.buildagent.client.BuildAgentHttpClient;
-import org.jboss.pnc.buildagent.client.HttpClientConfiguration;
-import org.jboss.pnc.buildagent.common.http.HttpClient;
-import org.junit.Assert;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.FileNotFoundException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -33,6 +26,13 @@ import java.nio.file.Paths;
 import java.util.Scanner;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+
+import org.jboss.pnc.buildagent.client.BuildAgentHttpClient;
+import org.jboss.pnc.buildagent.client.HttpClientConfiguration;
+import org.jboss.pnc.buildagent.common.http.HttpClient;
+import org.junit.Assert;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author <a href="mailto:matejonnet@gmail.com">Matej Lazar</a>
@@ -53,8 +53,7 @@ public class FileUploadAbstract {
         BuildAgentHttpClient buildAgentHttpClient = new BuildAgentHttpClient(configuration);
         CompletableFuture<HttpClient.Response> responseFuture = buildAgentHttpClient.uploadFile(
                 ByteBuffer.wrap(fileContent.getBytes(StandardCharsets.UTF_8)),
-                fileUploadPath
-                );
+                fileUploadPath);
 
         HttpClient.Response response = responseFuture.get(10, TimeUnit.SECONDS);
         Assert.assertEquals("Invalid response code.", 200, response.getCode());

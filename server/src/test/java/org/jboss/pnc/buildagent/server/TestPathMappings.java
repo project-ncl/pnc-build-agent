@@ -18,12 +18,8 @@
 
 package org.jboss.pnc.buildagent.server;
 
-import org.jboss.pnc.buildagent.common.BuildAgentException;
-import org.jboss.pnc.buildagent.common.RandomUtils;
-import org.junit.Assert;
-import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static org.jboss.pnc.buildagent.common.http.HttpClient.DEFAULT_HTTP_READ;
+import static org.jboss.pnc.buildagent.common.http.HttpClient.DEFAULT_HTTP_WRITE;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -32,9 +28,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import static org.jboss.pnc.buildagent.common.http.HttpClient.DEFAULT_HTTP_READ;
-import static org.jboss.pnc.buildagent.common.http.HttpClient.DEFAULT_HTTP_WRITE;
-
+import org.jboss.pnc.buildagent.common.BuildAgentException;
+import org.jboss.pnc.buildagent.common.RandomUtils;
+import org.junit.Assert;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author <a href="mailto:matejonnet@gmail.com">Matej Lazar</a>
@@ -49,9 +48,27 @@ public class TestPathMappings {
     public void serverShouldListenOnRoot() throws BuildAgentException, InterruptedException, IOException {
         Map<String, String> mdcMap = new HashMap<>();
         mdcMap.put("ctx", RandomUtils.randString(8));
-        Options options = new Options(HOST, 0, "", true, false, 3, 100, null, "", "", "", DEFAULT_HTTP_READ, DEFAULT_HTTP_WRITE);
+        Options options = new Options(
+                HOST,
+                0,
+                "",
+                true,
+                false,
+                3,
+                100,
+                null,
+                "",
+                "",
+                "",
+                DEFAULT_HTTP_READ,
+                DEFAULT_HTTP_WRITE);
 
-        BuildAgentServer buildAgent = new BuildAgentServer(Optional.empty(), Optional.empty(), new IoLoggerName[0], options, mdcMap);
+        BuildAgentServer buildAgent = new BuildAgentServer(
+                Optional.empty(),
+                Optional.empty(),
+                new IoLoggerName[0],
+                options,
+                mdcMap);
 
         HttpURLConnection connection200 = connectToUrl(buildAgent.getPort(), "");
         Assert.assertEquals("Unexpected http response code.", 200, connection200.getResponseCode());
@@ -67,8 +84,26 @@ public class TestPathMappings {
         Map<String, String> mdcMap = new HashMap<>();
         mdcMap.put("ctx", RandomUtils.randString(8));
         String contextPath = "ctx-path";
-        Options options = new Options(HOST, 0, "/" + contextPath, true, false,3, 100, null, "", "", "", DEFAULT_HTTP_READ, DEFAULT_HTTP_WRITE);
-        BuildAgentServer buildAgent = new BuildAgentServer(Optional.empty(), Optional.empty(), new IoLoggerName[0], options, mdcMap);
+        Options options = new Options(
+                HOST,
+                0,
+                "/" + contextPath,
+                true,
+                false,
+                3,
+                100,
+                null,
+                "",
+                "",
+                "",
+                DEFAULT_HTTP_READ,
+                DEFAULT_HTTP_WRITE);
+        BuildAgentServer buildAgent = new BuildAgentServer(
+                Optional.empty(),
+                Optional.empty(),
+                new IoLoggerName[0],
+                options,
+                mdcMap);
 
         HttpURLConnection connection200 = connectToUrl(buildAgent.getPort(), contextPath);
         Assert.assertEquals("Unexpected http response code.", 200, connection200.getResponseCode());
@@ -81,7 +116,6 @@ public class TestPathMappings {
 
         buildAgent.stop();
     }
-
 
     private HttpURLConnection connectToUrl(int port, String path) throws IOException {
         URL url = new URL("http://" + HOST + ":" + port + "/" + path);

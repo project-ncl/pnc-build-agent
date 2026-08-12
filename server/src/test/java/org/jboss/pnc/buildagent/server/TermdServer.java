@@ -18,18 +18,18 @@
 
 package org.jboss.pnc.buildagent.server;
 
-import org.jboss.pnc.buildagent.common.BuildAgentException;
-import org.jboss.pnc.buildagent.common.RandomUtils;
-import org.jboss.pnc.buildagent.common.http.HttpClient;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import org.jboss.pnc.buildagent.common.BuildAgentException;
+import org.jboss.pnc.buildagent.common.RandomUtils;
+import org.jboss.pnc.buildagent.common.http.HttpClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author <a href="mailto:matejonnet@gmail.com">Matej Lazar</a>
@@ -56,12 +56,17 @@ public class TermdServer {
     /**
      * Try to start the build agent and block until it is up and running.
      */
-    public static void startServer(String host, int port, String bindPath, boolean enableSocketInvoker, boolean writeLogFile) throws InterruptedException {
+    public static void startServer(
+            String host,
+            int port,
+            String bindPath,
+            boolean enableSocketInvoker,
+            boolean writeLogFile) throws InterruptedException {
         Optional<Path> logFolder;
         IoLoggerName[] primaryLoggers;
         if (writeLogFile) {
             logFolder = Optional.of(Paths.get("").toAbsolutePath());
-            primaryLoggers = new IoLoggerName[] { IoLoggerName.FILE};
+            primaryLoggers = new IoLoggerName[] { IoLoggerName.FILE };
         } else {
             logFolder = Optional.empty();
             primaryLoggers = new IoLoggerName[0];

@@ -1,10 +1,5 @@
 package org.jboss.pnc.buildagent.common;
 
-import org.junit.Assert;
-import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
@@ -14,6 +9,11 @@ import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+
+import org.junit.Assert;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author <a href="mailto:matejonnet@gmail.opecom">Matej Lazar</a>
@@ -78,7 +78,7 @@ public class LineConsumerTest {
             if (added == sliceSize) {
                 inputs.add(buffer.toByteArray());
                 buffer.reset();
-                added=0;
+                added = 0;
             }
         }
         //last chunk (smaller than sliceSize)

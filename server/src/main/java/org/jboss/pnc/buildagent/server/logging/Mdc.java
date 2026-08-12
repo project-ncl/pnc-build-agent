@@ -1,14 +1,15 @@
 package org.jboss.pnc.buildagent.server.logging;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * @author <a href="mailto:matejonnet@gmail.com">Matej Lazar</a>
@@ -35,7 +36,9 @@ public class Mdc {
             for (String keyVal : keyVals) {
                 String[] split = keyVal.split(":");
                 if (split.length != 2) {
-                    logger.warn("Invalid logMdc, expected comma-separated list of key value pairs delimited with colon. eg. k1:v1,k2,v2. Found:{}", logMDC);
+                    logger.warn(
+                            "Invalid logMdc, expected comma-separated list of key value pairs delimited with colon. eg. k1:v1,k2,v2. Found:{}",
+                            logMDC);
                     return Optional.empty();
                 }
                 String key = split[0];
