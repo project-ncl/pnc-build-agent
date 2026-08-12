@@ -16,7 +16,7 @@ jobs:
       uses: project-ncl/shared-github-actions/.github/workflows/maven-release.yml@a27e6fba6b28bbb96881ec096e9c8ea5a538f481 # v0.0.22
       with:
         ref_to_release: ${{ inputs.ref_to_release }}
-        java_version: 8
+        java_version: 17
       secrets:
         SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
         SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}

@@ -19,6 +19,5 @@ jobs:
   call-maven-ci:
     uses: project-ncl/shared-github-actions/.github/workflows/maven-ci.yml@a27e6fba6b28bbb96881ec096e9c8ea5a538f481 # v0.0.22
     with:
-      # try to force using a Java 8 compiler only to make sure it only compiles with Java 8
-      java_version: 8
+      java_version: 17
       upload_artifacts: true
