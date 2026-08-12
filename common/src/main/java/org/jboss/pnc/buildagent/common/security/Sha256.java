@@ -17,7 +17,6 @@
  */
 package org.jboss.pnc.buildagent.common.security;
 
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -34,7 +33,7 @@ public class Sha256 {
     }
 
     public static String digest(String message)
-            throws NoSuchAlgorithmException, IOException {
+            throws NoSuchAlgorithmException {
         return CheckSum.calculateDigest(message, "SHA-256");
     }
 
