@@ -31,10 +31,6 @@
     </dependency>
     <dependency>
       <groupId>org.jboss.pnc</groupId>
-      <artifactId>pnc-common</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.jboss.pnc</groupId>
       <artifactId>bifrost-upload-client</artifactId>
     </dependency>
 
