@@ -1,9 +1,9 @@
 package org.jboss.pnc.buildagent.server.httpinvoker;
 
-import io.undertow.util.CopyOnWriteMap;
-
 import java.util.Map;
 import java.util.Optional;
+
+import io.undertow.util.CopyOnWriteMap;
 
 /**
  * @author <a href="mailto:matejonnet@gmail.com">Matej Lazar</a>

@@ -18,13 +18,13 @@
 
 package org.jboss.pnc.buildagent.server.termserver;
 
-import io.termd.core.http.HttpTtyConnection;
-import io.termd.core.tty.TtyConnection;
-import io.termd.core.util.Vector;
-import io.undertow.websockets.core.AbstractReceiveListener;
-import io.undertow.websockets.core.BufferedBinaryMessage;
-import io.undertow.websockets.core.WebSocketChannel;
-import io.undertow.websockets.core.WebSockets;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
+
 import org.jboss.pnc.buildagent.api.ResponseMode;
 import org.jboss.pnc.buildagent.common.BuildAgentException;
 import org.slf4j.Logger;
@@ -32,12 +32,13 @@ import org.slf4j.LoggerFactory;
 import org.xnio.ChannelListener;
 import org.xnio.Pooled;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
+import io.termd.core.http.HttpTtyConnection;
+import io.termd.core.tty.TtyConnection;
+import io.termd.core.util.Vector;
+import io.undertow.websockets.core.AbstractReceiveListener;
+import io.undertow.websockets.core.BufferedBinaryMessage;
+import io.undertow.websockets.core.WebSocketChannel;
+import io.undertow.websockets.core.WebSockets;
 
 /**
  * @author <a href="mailto:matejonnet@gmail.com">Matej Lazar</a>
@@ -100,7 +101,8 @@ public class WebSocketTtyConnection extends HttpTtyConnection implements TtyConn
         ChannelListener<WebSocketChannel> listener = new AbstractReceiveListener() {
 
             @Override
-            protected void onFullBinaryMessage(WebSocketChannel channel, BufferedBinaryMessage message) throws IOException {
+            protected void onFullBinaryMessage(WebSocketChannel channel, BufferedBinaryMessage message)
+                    throws IOException {
                 log.trace("Server received full binary message");
                 Pooled<ByteBuffer[]> pulledData = message.getData();
                 try {
@@ -125,7 +127,6 @@ public class WebSocketTtyConnection extends HttpTtyConnection implements TtyConn
             super.writeToDecoder(msg);
         }
     }
-
 
     public boolean isOpen() {
         return webSocketChannel != null && webSocketChannel.isOpen();

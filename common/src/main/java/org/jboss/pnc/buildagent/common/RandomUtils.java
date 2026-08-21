@@ -30,7 +30,7 @@ public class RandomUtils {
      * <code>Integer.MAX_VALUE - 1</code>.
      *
      * @param min Minimum value
-     * @param max Maximum value.  Must be greater than min.
+     * @param max Maximum value. Must be greater than min.
      * @return Integer between min and max, inclusive.
      * @see Random#nextInt(int)
      * @see "http://stackoverflow.com/questions/363681/generating-random-integers-in-a-range-with-java"

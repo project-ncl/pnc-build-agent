@@ -46,6 +46,4 @@ public class Sha256 {
         return CheckSum.format(digest);
     }
 
-
-
 }

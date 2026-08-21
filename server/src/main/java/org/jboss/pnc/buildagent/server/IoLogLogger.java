@@ -18,14 +18,14 @@
 
 package org.jboss.pnc.buildagent.server;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
-
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Map;
 import java.util.function.Consumer;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 /**
  * @author <a href="mailto:matejonnet@gmail.opecom">Matej Lazar</a>
@@ -46,7 +46,8 @@ public class IoLogLogger implements ReadOnlyChannel {
 
     @Override
     public void flush() throws IOException {
-        throw new IOException(new UnsupportedOperationException("Not implemented! IoLogLogger can not be used as primary."));
+        throw new IOException(
+                new UnsupportedOperationException("Not implemented! IoLogLogger can not be used as primary."));
     }
 
     @Override

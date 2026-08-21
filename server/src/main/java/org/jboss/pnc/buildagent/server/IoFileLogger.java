@@ -18,16 +18,16 @@
 
 package org.jboss.pnc.buildagent.server;
 
-import org.jboss.pnc.buildagent.common.Arrays;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+
+import org.jboss.pnc.buildagent.common.Arrays;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author <a href="mailto:matejonnet@gmail.opecom">Matej Lazar</a>
@@ -69,7 +69,9 @@ public class IoFileLogger implements ReadOnlyChannel {
                     String bytesAsInts = java.util.Arrays.stream(Arrays.bytesToInts(bytes))
                             .mapToObj(i -> Integer.toString(i))
                             .collect(Collectors.joining(", "));
-                    log.error("Cannot write bytes [" + bytesAsInts + "] to file. IsPrimaryLogger: " + isPrimary() + "", e);
+                    log.error(
+                            "Cannot write bytes [" + bytesAsInts + "] to file. IsPrimaryLogger: " + isPrimary() + "",
+                            e);
                 }
             };
 
@@ -77,7 +79,6 @@ public class IoFileLogger implements ReadOnlyChannel {
             log.error("Cannot open fileChannel: ", e);
         }
     }
-
 
     @Override
     public void flush() throws IOException {

@@ -17,10 +17,10 @@
  */
 package org.jboss.pnc.buildagent.server.logging;
 
-import org.jboss.pnc.buildagent.common.StringLiner;
-
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.jboss.pnc.buildagent.common.StringLiner;
 
 public class LogMatcher {
     private final Pattern pattern;
@@ -33,11 +33,12 @@ public class LogMatcher {
         this.pattern = pattern;
         matcher = pattern.matcher("");
     }
+
     public void append(String string) {
         sl.append(string);
 
         String line = sl.nextLine();
-        while (line != null){
+        while (line != null) {
             matcher.reset(line);
             if (matcher.find()) {
                 matched = true;

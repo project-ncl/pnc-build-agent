@@ -19,15 +19,10 @@
 package org.jboss.pnc.buildagent.server;
 
 import org.junit.AfterClass;
-import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.FileNotFoundException;
-import java.nio.file.Path;
-import java.util.Scanner;
 
 /**
  * @author <a href="mailto:matejonnet@gmail.com">Matej Lazar</a>

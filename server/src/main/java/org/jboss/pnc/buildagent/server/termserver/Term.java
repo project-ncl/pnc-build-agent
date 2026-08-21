@@ -18,26 +18,6 @@
 
 package org.jboss.pnc.buildagent.server.termserver;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.termd.core.pty.PtyMaster;
-import io.termd.core.pty.Status;
-import io.termd.core.pty.TtyBridge;
-import io.undertow.server.HttpHandler;
-import io.undertow.websockets.WebSocketConnectionCallback;
-import io.undertow.websockets.WebSocketProtocolHandshakeHandler;
-import io.undertow.websockets.core.CloseMessage;
-import io.undertow.websockets.core.WebSocketChannel;
-import io.undertow.websockets.core.WebSockets;
-import org.jboss.pnc.buildagent.api.ResponseMode;
-import org.jboss.pnc.buildagent.api.TaskStatusUpdateEvent;
-import org.jboss.pnc.buildagent.common.Arrays;
-import org.jboss.pnc.buildagent.common.function.ThrowingConsumer;
-import org.jboss.pnc.buildagent.common.security.Md5;
-import org.jboss.pnc.buildagent.server.ReadOnlyChannel;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
@@ -47,6 +27,28 @@ import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Consumer;
+
+import org.jboss.pnc.buildagent.api.ResponseMode;
+import org.jboss.pnc.buildagent.api.TaskStatusUpdateEvent;
+import org.jboss.pnc.buildagent.common.Arrays;
+import org.jboss.pnc.buildagent.common.function.ThrowingConsumer;
+import org.jboss.pnc.buildagent.common.security.Md5;
+import org.jboss.pnc.buildagent.server.ReadOnlyChannel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import io.termd.core.pty.PtyMaster;
+import io.termd.core.pty.Status;
+import io.termd.core.pty.TtyBridge;
+import io.undertow.server.HttpHandler;
+import io.undertow.websockets.WebSocketConnectionCallback;
+import io.undertow.websockets.WebSocketProtocolHandshakeHandler;
+import io.undertow.websockets.core.CloseMessage;
+import io.undertow.websockets.core.WebSocketChannel;
+import io.undertow.websockets.core.WebSockets;
 
 /**
  * @author <a href="mailto:julien@julienviet.com">Julien Viet</a>
@@ -65,10 +67,13 @@ public class Term {
     CompleteHandler completeHandle = new CompleteHandler();
     private Md5 stdoutChecksum;
 
-
     private final Set<ReadOnlyChannel> readOnlyChannels = new CopyOnWriteArraySet<>();
 
-    public Term(String context, Runnable onDestroy, ScheduledExecutorService executor, Set<ReadOnlyChannel> readOnlyChannels) {
+    public Term(
+            String context,
+            Runnable onDestroy,
+            ScheduledExecutorService executor,
+            Set<ReadOnlyChannel> readOnlyChannels) {
         this.context = context;
         this.onDestroy = onDestroy;
         this.readOnlyChannels.addAll(readOnlyChannels);
@@ -92,13 +97,13 @@ public class Term {
             if (!ttyBridgeInitialized) {
                 TtyBridge ttyBridge = new TtyBridge(webSocketTtyConnection);
                 ttyBridge
-                    .setProcessListener(onTaskCreated())
-                    .setProcessStdoutListener(ints -> onStdOut(ints))
-                    .setProcessStdinListener((commandLine) -> {
-                        log.debug("New command received: {}", commandLine);
-                        onStdIn(commandLine);
-                    })
-                    .readline();
+                        .setProcessListener(onTaskCreated())
+                        .setProcessStdoutListener(ints -> onStdOut(ints))
+                        .setProcessStdinListener((commandLine) -> {
+                            log.debug("New command received: {}", commandLine);
+                            onStdIn(commandLine);
+                        })
+                        .readline();
                 ttyBridgeInitialized = true;
             }
         }
@@ -128,8 +133,7 @@ public class Term {
                                 StatusConverter.fromTermdStatus(oldStatus),
                                 StatusConverter.fromTermdStatus(newStatus),
                                 context,
-                                logDigest)
-                );
+                                logDigest));
             });
         };
     }
@@ -137,7 +141,11 @@ public class Term {
     void notifyStatusUpdated(TaskStatusUpdateEvent event) {
         if (event.getNewStatus().isFinal()) {
             activeCommand = false;
-            log.debug("Command [context:{} taskId:{}] execution completed with status {}.", event.getContext(), event.getTaskId(), event.getNewStatus());
+            log.debug(
+                    "Command [context:{} taskId:{}] execution completed with status {}.",
+                    event.getContext(),
+                    event.getTaskId(),
+                    event.getNewStatus());
 
             try {
                 readOnlyChannels.stream()
@@ -153,7 +161,11 @@ public class Term {
             }
             completeHandle.setCompletionEventAndRun(event);
         } else {
-            log.debug("Setting command active flag [context:{} taskId:{}] Notifying status {}.", event.getContext(), event.getTaskId(), event.getNewStatus());
+            log.debug(
+                    "Setting command active flag [context:{} taskId:{}] Notifying status {}.",
+                    event.getContext(),
+                    event.getTaskId(),
+                    event.getNewStatus());
             activeCommand = true;
             completeHandle.reset();
             //notify only for non final statuses, final status have to wait for log completion. Is called in #complete
@@ -168,7 +180,11 @@ public class Term {
 
     private void notifyStatusUpdateListeners(TaskStatusUpdateEvent event) {
         for (TaskStatusUpdateListener statusUpdateListener : statusUpdateListeners) {
-            log.debug("Notifying listener {} in task {} with new status {}", statusUpdateListener, event.getTaskId(), event.getNewStatus());
+            log.debug(
+                    "Notifying listener {} in task {} with new status {}",
+                    statusUpdateListener,
+                    event.getTaskId(),
+                    event.getNewStatus());
             statusUpdateListener.getEventConsumer().accept(event);
         }
     }
@@ -192,7 +208,10 @@ public class Term {
                     rejectDueToAlreadyActive(webSocketChannel);
                     return;
                 }
-                log.info("Adding new master connection from remote address {} to context [{}].", webSocketChannel.getSourceAddress().toString(), context);
+                log.info(
+                        "Adding new master connection from remote address {} to context [{}].",
+                        webSocketChannel.getSourceAddress().toString(),
+                        context);
                 webSocketTtyConnection.setWebSocketChannel(webSocketChannel, responseMode);
                 webSocketChannel.addCloseTask((task) -> {
                     log.debug("Master connection closed.");
@@ -203,10 +222,16 @@ public class Term {
             } else {
                 ReadOnlyChannel readOnlyChannel;
                 if (responseMode.equals(ResponseMode.TEXT)) {
-                    log.info("Adding new readonly text consumer connection from remote address {} to context [{}].", webSocketChannel.getSourceAddress().toString(), context);
+                    log.info(
+                            "Adding new readonly text consumer connection from remote address {} to context [{}].",
+                            webSocketChannel.getSourceAddress().toString(),
+                            context);
                     readOnlyChannel = new ReadOnlyWebSocketTextChannel(webSocketChannel);
                 } else {
-                    log.info("Adding new readonly binary consumer connection from remote address {} to context [{}].", webSocketChannel.getSourceAddress().toString(), context);
+                    log.info(
+                            "Adding new readonly binary consumer connection from remote address {} to context [{}].",
+                            webSocketChannel.getSourceAddress().toString(),
+                            context);
                     readOnlyChannel = new ReadOnlyWebSocketChannel(webSocketChannel);
                 }
                 readOnlyChannels.add(readOnlyChannel);
@@ -237,7 +262,9 @@ public class Term {
                     WebSockets.sendClose(CloseMessage.UNEXPECTED_ERROR, errorMessage, webSocketChannel, null);
                 }
             };
-            TaskStatusUpdateListener statusUpdateListener = new TaskStatusUpdateListener(eventConsumer, webSocketChannel);
+            TaskStatusUpdateListener statusUpdateListener = new TaskStatusUpdateListener(
+                    eventConsumer,
+                    webSocketChannel);
             log.debug("Registering new status update listener {}.", statusUpdateListener);
             addStatusUpdateListener(statusUpdateListener);
             webSocketChannel.addCloseTask((task) -> removeStatusUpdateListener(statusUpdateListener));

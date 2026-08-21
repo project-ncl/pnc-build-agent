@@ -1,9 +1,26 @@
 package org.jboss.pnc.buildagent.server.servlet;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.termd.core.pty.PtyMaster;
-import io.termd.core.pty.Status;
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.jboss.pnc.buildagent.api.Status.FAILED;
+import static org.jboss.pnc.buildagent.api.Status.SYSTEM_ERROR;
+
+import java.io.IOException;
+import java.net.URI;
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+import java.security.NoSuchAlgorithmException;
+import java.time.OffsetDateTime;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.Future;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.jboss.pnc.api.constants.HttpHeaders;
 import org.jboss.pnc.api.constants.MDCKeys;
 import org.jboss.pnc.api.dto.HeartbeatConfig;
@@ -32,25 +49,11 @@ import org.jboss.pnc.buildagent.server.termserver.StatusConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.net.URI;
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
-import java.security.NoSuchAlgorithmException;
-import java.time.OffsetDateTime;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.Future;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.jboss.pnc.buildagent.api.Status.FAILED;
-import static org.jboss.pnc.buildagent.api.Status.SYSTEM_ERROR;
+import io.termd.core.pty.PtyMaster;
+import io.termd.core.pty.Status;
 
 /**
  * @author <a href="mailto:matejonnet@gmail.com">Matej Lazar</a>
@@ -180,7 +183,7 @@ public class HttpInvoker extends HttpServlet {
                     .newStatus(resolveStatus(newStatus))
                     .outputChecksum(md5);
 
-            if(bifrostUploaderOptions != null) {
+            if (bifrostUploaderOptions != null) {
                 uploadLogsToBifrost(md5);
             }
         } catch (IOException e) {
@@ -209,14 +212,14 @@ public class HttpInvoker extends HttpServlet {
                     -1L,
                     0,
                     0)
-            .handle((response, throwable) -> {
-                if (throwable != null) {
-                    logger.error("Cannot send completion callback.", throwable);
-                } else {
-                    logger.info("Completion callback sent. Response code: {}.", response.getCode());
-                }
-                return null;
-            });
+                    .handle((response, throwable) -> {
+                        if (throwable != null) {
+                            logger.error("Cannot send completion callback.", throwable);
+                        } else {
+                            logger.info("Completion callback sent. Response code: {}.", response.getCode());
+                        }
+                        return null;
+                    });
         } catch (JsonProcessingException e) {
             logger.error("Cannot serialize invoke object.", e);
         }
@@ -235,12 +238,14 @@ public class HttpInvoker extends HttpServlet {
     private void uploadLogsToBifrost(String md5) {
         BifrostLogUploader logUploader = null;
         if (ldapClient != null) {
-            logUploader = new BifrostLogUploader(URI.create(bifrostUploaderOptions.getBifrostURL()),
+            logUploader = new BifrostLogUploader(
+                    URI.create(bifrostUploaderOptions.getBifrostURL()),
                     ldapClient::getBasicAuthHeaderValue,
                     bifrostUploaderOptions.getMaxRetries(),
                     bifrostUploaderOptions.getWaitBeforeRetry());
         } else if (keycloakClient != null) {
-            logUploader = new BifrostLogUploader(URI.create(bifrostUploaderOptions.getBifrostURL()),
+            logUploader = new BifrostLogUploader(
+                    URI.create(bifrostUploaderOptions.getBifrostURL()),
                     keycloakClient::getBearerAccessToken,
                     bifrostUploaderOptions.getMaxRetries(),
                     bifrostUploaderOptions.getWaitBeforeRetry());
@@ -263,10 +268,12 @@ public class HttpInvoker extends HttpServlet {
     private void authenticateCallback(Request original) {
         if (ldapClient != null) {
             logger.info("Using LDAP service account token for callback");
-            original.getHeaders().add(new Request.Header(HttpHeaders.AUTHORIZATION_STRING, ldapClient.getBasicAuthHeaderValue()));
+            original.getHeaders()
+                    .add(new Request.Header(HttpHeaders.AUTHORIZATION_STRING, ldapClient.getBasicAuthHeaderValue()));
         } else if (keycloakClient != null) {
             logger.info("Using Keycloak service account token for callback");
-            original.getHeaders().add(new Request.Header(HttpHeaders.AUTHORIZATION_STRING, keycloakClient.getBearerAccessToken()));
+            original.getHeaders()
+                    .add(new Request.Header(HttpHeaders.AUTHORIZATION_STRING, keycloakClient.getBearerAccessToken()));
         }
     }
 }

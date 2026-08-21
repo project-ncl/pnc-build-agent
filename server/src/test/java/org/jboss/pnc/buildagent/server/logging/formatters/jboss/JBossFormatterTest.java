@@ -1,6 +1,10 @@
 package org.jboss.pnc.buildagent.server.logging.formatters.jboss;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Properties;
+
 import org.jboss.pnc.buildagent.api.logging.LogFormatter;
 import org.junit.Assert;
 import org.junit.Test;
@@ -8,10 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
-import java.io.IOException;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Properties;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * @author <a href="mailto:matejonnet@gmail.com">Matej Lazar</a>
@@ -37,7 +38,7 @@ public class JBossFormatterTest {
 
         Assert.assertEquals(message, map.get("message"));
         Assert.assertEquals("org.jboss.pnc._userlog_.build-log", map.get("loggerName"));
-        Assert.assertEquals(ctx, ((Map)map.get("mdc")).get("ctx"));
+        Assert.assertEquals(ctx, ((Map) map.get("mdc")).get("ctx"));
         Assert.assertEquals("localhost", map.get("hostName"));
 
         //wait to send out async system logs
@@ -65,7 +66,7 @@ public class JBossFormatterTest {
 
         Assert.assertEquals(message, map.get("message"));
         Assert.assertEquals("org.jboss.pnc._userlog_.build-log", map.get("loggerName"));
-        Assert.assertEquals(ctx, ((Map)map.get("mdc")).get("ctx"));
+        Assert.assertEquals(ctx, ((Map) map.get("mdc")).get("ctx"));
         Assert.assertEquals("localhost", map.get("hostName"));
     }
 }

@@ -34,7 +34,12 @@ public class AuthHeaderFilterConfiguration {
     public AuthHeaderFilterConfiguration() {
     }
 
-    public AuthHeaderFilterConfiguration(String publicKey, String authServerUrl, String ldapHost, int ldapPort, String ldapSearchBase) {
+    public AuthHeaderFilterConfiguration(
+            String publicKey,
+            String authServerUrl,
+            String ldapHost,
+            int ldapPort,
+            String ldapSearchBase) {
         this.realmPublicKey = publicKey;
         this.authServerUrl = authServerUrl;
         this.ldapHost = ldapHost;

@@ -1,9 +1,9 @@
 package org.jboss.pnc.buildagent.common;
 
+import java.nio.charset.StandardCharsets;
+
 import org.junit.Assert;
 import org.junit.Test;
-
-import java.nio.charset.StandardCharsets;
 
 /**
  * @author <a href="mailto:matejonnet@gmail.com">Matej Lazar</a>
@@ -17,7 +17,7 @@ public class ArraysTest {
 
         for (int i = 0; i < string.length(); i++) {
             char c = string.charAt(i);
-            ints[i] = ((int)c);
+            ints[i] = ((int) c);
         }
 
         byte[] bytes = Arrays.charIntstoBytes(ints, StandardCharsets.UTF_8);

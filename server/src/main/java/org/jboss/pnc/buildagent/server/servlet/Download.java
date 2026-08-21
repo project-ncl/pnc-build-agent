@@ -18,17 +18,18 @@
 
 package org.jboss.pnc.buildagent.server.servlet;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author <a href="mailto:matejonnet@gmail.com">Matej Lazar</a>
@@ -38,7 +39,8 @@ public class Download extends HttpServlet {
     private static Logger log = LoggerFactory.getLogger(Download.class);
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
         log.debug("Download servlet requested.");
 
         String fileLocation = request.getPathInfo();
@@ -48,7 +50,7 @@ public class Download extends HttpServlet {
             log.warn("Invalid file path {}", file);
         }
 
-        response.setContentLength((int)file.length());
+        response.setContentLength((int) file.length());
 
         try (ServletOutputStream outputStream = response.getOutputStream()) {
             try (FileInputStream fileInputStream = new FileInputStream(file)) {

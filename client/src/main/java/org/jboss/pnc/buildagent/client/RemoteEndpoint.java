@@ -18,17 +18,18 @@
 
 package org.jboss.pnc.buildagent.client;
 
-import org.jboss.pnc.buildagent.api.Constants;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.nio.charset.StandardCharsets;
+import java.util.function.Consumer;
 
 import javax.websocket.CloseReason;
 import javax.websocket.Endpoint;
 import javax.websocket.EndpointConfig;
 import javax.websocket.MessageHandler;
 import javax.websocket.Session;
-import java.nio.charset.StandardCharsets;
-import java.util.function.Consumer;
+
+import org.jboss.pnc.buildagent.api.Constants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @see "https://github.com/undertow-io/undertow/blob/5bdddf327209a4abf18792e78148863686c26e9b/websockets-jsr/src/test/java/io/undertow/websockets/jsr/test/BinaryEndpointTest.java"
@@ -52,7 +53,10 @@ public class RemoteEndpoint extends Endpoint {
     private Consumer<CloseReason> onCloseConsumer;
     private Consumer<Throwable> onErrorConsumer;
 
-    public RemoteEndpoint(Consumer<Session> onOpenConsumer, Consumer<CloseReason> onCloseConsumer, Consumer<Throwable> onErrorConsumer) {
+    public RemoteEndpoint(
+            Consumer<Session> onOpenConsumer,
+            Consumer<CloseReason> onCloseConsumer,
+            Consumer<Throwable> onErrorConsumer) {
         this.onOpenConsumer = onOpenConsumer;
         this.onCloseConsumer = onCloseConsumer;
         this.onErrorConsumer = onErrorConsumer;
@@ -96,7 +100,10 @@ public class RemoteEndpoint extends Endpoint {
         session.addMessageHandler(new MessageHandler.Whole<byte[]>() {
             @Override
             public void onMessage(byte[] bytes) {
-                log.trace("Client received binary MESSAGE: [{}]. Raw bytes [{}].", new String(bytes, StandardCharsets.UTF_8), bytes);
+                log.trace(
+                        "Client received binary MESSAGE: [{}]. Raw bytes [{}].",
+                        new String(bytes, StandardCharsets.UTF_8),
+                        bytes);
                 if (onBinaryMessageConsumer != null) {
                     onBinaryMessageConsumer.accept(bytes);
                 }

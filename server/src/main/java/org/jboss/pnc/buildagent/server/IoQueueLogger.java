@@ -18,13 +18,6 @@
 
 package org.jboss.pnc.buildagent.server;
 
-import org.jboss.pnc.buildagent.api.logging.LogFormatter;
-import org.jboss.pnc.buildagent.common.LineConsumer;
-import org.jboss.pnc.buildagent.server.logging.formatters.jboss.JBossFormatter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
-
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
@@ -39,6 +32,13 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
+
+import org.jboss.pnc.buildagent.api.logging.LogFormatter;
+import org.jboss.pnc.buildagent.common.LineConsumer;
+import org.jboss.pnc.buildagent.server.logging.formatters.jboss.JBossFormatter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 /**
  * @author <a href="mailto:matejonnet@gmail.opecom">Matej Lazar</a>
@@ -60,7 +60,11 @@ public class IoQueueLogger implements ReadOnlyChannel {
 
     private final LineConsumer lineConsumer;
 
-    public IoQueueLogger(QueueAdapter queueAdapter, boolean primary, long flushTimeoutMillis, Map<String, String> logMDC)
+    public IoQueueLogger(
+            QueueAdapter queueAdapter,
+            boolean primary,
+            long flushTimeoutMillis,
+            Map<String, String> logMDC)
             throws InstantiationException, UnsupportedEncodingException {
         this.primary = primary;
         this.flushTimeoutMillis = flushTimeoutMillis;
@@ -73,7 +77,7 @@ public class IoQueueLogger implements ReadOnlyChannel {
             deliveryException.compareAndSet(null, e);
         };
 
-        Consumer<String> onLine = (line)-> {
+        Consumer<String> onLine = (line) -> {
             String messageJson = logFormatter.format(line);
             queueAdapter.send(messageJson, exceptionHandler);
         };
@@ -122,6 +126,5 @@ public class IoQueueLogger implements ReadOnlyChannel {
         log.info("Closing IoQueueLogger.");
         queueAdapter.close();
     }
-
 
 }

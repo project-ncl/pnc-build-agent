@@ -31,7 +31,7 @@ public class StringLiner {
         return null;
     }
 
-    public String currentlyBuffered(){
+    public String currentlyBuffered() {
         return stringBuffer.toString();
     }
 }

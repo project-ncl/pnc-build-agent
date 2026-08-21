@@ -1,18 +1,5 @@
 package org.jboss.pnc.buildagent.client;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import org.jboss.pnc.api.dto.HeartbeatConfig;
-import org.jboss.pnc.api.dto.Request;
-import org.jboss.pnc.buildagent.api.Constants;
-import org.jboss.pnc.buildagent.api.httpinvoke.Cancel;
-import org.jboss.pnc.buildagent.api.httpinvoke.InvokeRequest;
-import org.jboss.pnc.buildagent.api.httpinvoke.InvokeResponse;
-import org.jboss.pnc.buildagent.api.httpinvoke.RetryConfig;
-import org.jboss.pnc.buildagent.common.StringUtils;
-import org.jboss.pnc.buildagent.common.http.HttpClient;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -26,6 +13,20 @@ import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+
+import org.jboss.pnc.api.dto.HeartbeatConfig;
+import org.jboss.pnc.api.dto.Request;
+import org.jboss.pnc.buildagent.api.Constants;
+import org.jboss.pnc.buildagent.api.httpinvoke.Cancel;
+import org.jboss.pnc.buildagent.api.httpinvoke.InvokeRequest;
+import org.jboss.pnc.buildagent.api.httpinvoke.InvokeResponse;
+import org.jboss.pnc.buildagent.api.httpinvoke.RetryConfig;
+import org.jboss.pnc.buildagent.common.StringUtils;
+import org.jboss.pnc.buildagent.common.http.HttpClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 /**
  * @author <a href="mailto:matejonnet@gmail.com">Matej Lazar</a>
@@ -52,8 +53,7 @@ public class BuildAgentHttpClient extends BuildAgentClientBase implements BuildA
             this.callback = new Request(
                     Request.Method.valueOf(callbackMethod),
                     callbackUrl.toURI(),
-                    Collections.emptyList()
-            );
+                    Collections.emptyList());
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
@@ -83,7 +83,8 @@ public class BuildAgentHttpClient extends BuildAgentClientBase implements BuildA
     }
 
     /**
-     * It is preferable to use a single instance of a HttpClient for all the BuildAgentClients because of the HttpClient's
+     * It is preferable to use a single instance of a HttpClient for all the BuildAgentClients because of the
+     * HttpClient's
      * internal thread pool.
      */
     public BuildAgentHttpClient(HttpClient httpClient, HttpClientConfiguration configuration)
@@ -111,7 +112,7 @@ public class BuildAgentHttpClient extends BuildAgentClientBase implements BuildA
 
     @Override
     public void execute(Object command, long executeTimeout, TimeUnit unit) throws BuildAgentClientException {
-        CompletableFuture<HttpClient.Response> responseFuture =  internalExecuteAsync(command, heartbeatConfig);
+        CompletableFuture<HttpClient.Response> responseFuture = internalExecuteAsync(command, heartbeatConfig);
 
         HttpClient.Response response;
         try {
@@ -134,14 +135,16 @@ public class BuildAgentHttpClient extends BuildAgentClientBase implements BuildA
                     try {
                         return parseSessionID(response);
                     } catch (IOException e) {
-                        throw new CompletionException(new BuildAgentClientException("Cannot read command invocation response.", e));
+                        throw new CompletionException(
+                                new BuildAgentClientException("Cannot read command invocation response.", e));
                     }
                 });
     }
 
-    private String parseSessionID (HttpClient.Response response) throws IOException {
+    private String parseSessionID(HttpClient.Response response) throws IOException {
         logger.debug("Response code: {}, body: {}.", response.getCode(), response.getStringResult().getString());
-        InvokeResponse invokeResponse = objectMapper.readValue(response.getStringResult().getString(), InvokeResponse.class);
+        InvokeResponse invokeResponse = objectMapper
+                .readValue(response.getStringResult().getString(), InvokeResponse.class);
         return invokeResponse.getSessionId();
     }
 
@@ -159,16 +162,15 @@ public class BuildAgentHttpClient extends BuildAgentClientBase implements BuildA
 
         return asJson(new InvokeRequest(cmd, this.callback, heartbeatConfig.orElse(null)))
                 .thenCompose(requestJson -> {
-            return getHttpClient().invoke(
-                    new Request(Request.Method.POST, invokerUri, requestHeaders),
-                    ByteBuffer.wrap(requestJson.getBytes(StandardCharsets.UTF_8)),
-                    retryConfig.getMaxRetries(),
-                    retryConfig.getWaitBeforeRetry(),
-                    1L,
-                    0,
-                    0
-            );
-        });
+                    return getHttpClient().invoke(
+                            new Request(Request.Method.POST, invokerUri, requestHeaders),
+                            ByteBuffer.wrap(requestJson.getBytes(StandardCharsets.UTF_8)),
+                            retryConfig.getMaxRetries(),
+                            retryConfig.getWaitBeforeRetry(),
+                            1L,
+                            0,
+                            0);
+                });
     }
 
     /**
@@ -182,7 +184,8 @@ public class BuildAgentHttpClient extends BuildAgentClientBase implements BuildA
         try {
             HttpClient.Response response = responseFuture.get(5, TimeUnit.SECONDS);
             if (response.getCode() != 200) {
-                throw new BuildAgentClientException(String.format("Remove invocation failed, received status {}.", response.getCode()));
+                throw new BuildAgentClientException(
+                        String.format("Remove invocation failed, received status {}.", response.getCode()));
             }
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             throw new BuildAgentClientException("Error reading cancel request.", e);
@@ -192,14 +195,15 @@ public class BuildAgentHttpClient extends BuildAgentClientBase implements BuildA
     @Override
     public CompletableFuture<HttpClient.Response> cancel(String sessionId) {
         return asJson(new Cancel(sessionId))
-                .thenCompose(requestJson -> getHttpClient().invoke(
-                        new Request(Request.Method.PUT, invokerUri, requestHeaders),
-                        ByteBuffer.wrap(requestJson.getBytes(StandardCharsets.UTF_8)),
-                        retryConfig.getMaxRetries(),
-                        retryConfig.getWaitBeforeRetry(),
-                        -1L,
-                        0,
-                        0));
+                .thenCompose(
+                        requestJson -> getHttpClient().invoke(
+                                new Request(Request.Method.PUT, invokerUri, requestHeaders),
+                                ByteBuffer.wrap(requestJson.getBytes(StandardCharsets.UTF_8)),
+                                retryConfig.getMaxRetries(),
+                                retryConfig.getWaitBeforeRetry(),
+                                -1L,
+                                0,
+                                0));
     }
 
     private CompletableFuture<String> asJson(Object request) {

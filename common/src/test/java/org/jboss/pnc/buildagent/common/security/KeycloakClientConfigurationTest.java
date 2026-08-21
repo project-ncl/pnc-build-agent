@@ -17,18 +17,19 @@
  */
 package org.jboss.pnc.buildagent.common.security;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Test;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class KeycloakClientConfigurationTest {
 
     @Test
     public void testConfiguration() throws Exception {
         String text = "{\"url\": \"https://google.com\"," +
-                       "\"realm\":\"realm\"," +
-                       "\"clientId\": \"clientId\"," +
-                       "\"clientSecret\": \"clientSecret\"}";
+                "\"realm\":\"realm\"," +
+                "\"clientId\": \"clientId\"," +
+                "\"clientSecret\": \"clientSecret\"}";
 
         ObjectMapper objectMapper = new ObjectMapper();
         KeycloakClientConfiguration configuration = objectMapper.readValue(text, KeycloakClientConfiguration.class);

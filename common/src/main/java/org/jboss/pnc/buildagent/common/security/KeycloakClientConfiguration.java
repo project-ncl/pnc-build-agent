@@ -17,10 +17,10 @@
  */
 package org.jboss.pnc.buildagent.common.security;
 
+import java.io.File;
+
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import java.io.File;
 
 /**
  * DTO for Keycloak Client Configuration; it's a companion class for KeycloakClient
@@ -32,7 +32,6 @@ public class KeycloakClientConfiguration {
     static {
         OBJECT_MAPPER.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
-
 
     private String url;
     private String realm;

@@ -1,8 +1,15 @@
 package org.jboss.pnc.buildagent.common;
 
-import io.undertow.Undertow;
-import io.undertow.server.DefaultByteBufferPool;
-import io.undertow.server.HttpHandler;
+import static org.jboss.pnc.buildagent.common.http.HttpClient.DEFAULT_OPTIONS;
+
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.ByteBuffer;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+
 import org.jboss.pnc.api.dto.Request;
 import org.jboss.pnc.buildagent.common.http.HttpClient;
 import org.junit.Assert;
@@ -15,15 +22,9 @@ import org.xnio.Xnio;
 import org.xnio.XnioWorker;
 import org.xnio.channels.StreamSinkChannel;
 
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.nio.ByteBuffer;
-import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-
-import static org.jboss.pnc.buildagent.common.http.HttpClient.DEFAULT_OPTIONS;
+import io.undertow.Undertow;
+import io.undertow.server.DefaultByteBufferPool;
+import io.undertow.server.HttpHandler;
 
 public class HttpClientTest {
 
@@ -34,15 +35,17 @@ public class HttpClientTest {
 
     }
 
-    @Test @Ignore //not a real test case, inspect the log
+    @Test
+    @Ignore //not a real test case, inspect the log
     public void shouldRetryFailedConnection()
             throws IOException, ExecutionException, InterruptedException, URISyntaxException {
         HttpClient httpClient = new HttpClient();
-        CompletableFuture<HttpClient.Response> completableFuture = httpClient.invoke(new Request(Request.Method.GET, new URI("http://host-not-found/")), "");
+        CompletableFuture<HttpClient.Response> completableFuture = httpClient
+                .invoke(new Request(Request.Method.GET, new URI("http://host-not-found/")), "");
         completableFuture.get();
     }
 
-    @Test (timeout = 5000L)
+    @Test(timeout = 5000L)
     public void shouldLimitDownloadSize()
             throws IOException, ExecutionException, InterruptedException, URISyntaxException {
         HttpHandler handler = exchange -> {
@@ -75,7 +78,7 @@ public class HttpClientTest {
                     0);
             HttpClient.Response response = responseFuture.get();
             Assert.assertFalse("Should be uncompleted response.", response.getStringResult().isComplete());
-            Assert.assertTrue("Download limit exceeded." ,response.getStringResult().getString().length() < 2 * 1024); //limit + buffer size
+            Assert.assertTrue("Download limit exceeded.", response.getStringResult().getString().length() < 2 * 1024); //limit + buffer size
         } finally {
             bufferPool.close();
             httpClient.close();

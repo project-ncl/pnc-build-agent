@@ -18,10 +18,10 @@
 
 package org.jboss.pnc.buildagent.common.http;
 
-import io.undertow.connector.ByteBufferPool;
-import io.undertow.connector.PooledByteBuffer;
-import io.undertow.server.XnioByteBufferPool;
-import io.undertow.websockets.core.UTF8Output;
+import java.io.IOException;
+import java.nio.Buffer;
+import java.nio.ByteBuffer;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xnio.ChannelListener;
@@ -29,9 +29,10 @@ import org.xnio.IoUtils;
 import org.xnio.Pool;
 import org.xnio.channels.StreamSourceChannel;
 
-import java.io.IOException;
-import java.nio.Buffer;
-import java.nio.ByteBuffer;
+import io.undertow.connector.ByteBufferPool;
+import io.undertow.connector.PooledByteBuffer;
+import io.undertow.server.XnioByteBufferPool;
+import io.undertow.websockets.core.UTF8Output;
 
 /**
  * Based on {@link io.undertow.util.StringReadChannelListener}
@@ -49,7 +50,8 @@ public abstract class LimitingStringReadChannelListener implements ChannelListen
 
     /**
      * @param bufferPool
-     * @param maxDownloadSize max bytes to read, -1 for no limit. The result varies for the buffer size, maximum read bytes are readLimit + buffer.size.
+     * @param maxDownloadSize max bytes to read, -1 for no limit. The result varies for the buffer size, maximum read
+     *        bytes are readLimit + buffer.size.
      */
     public LimitingStringReadChannelListener(final ByteBufferPool bufferPool, long maxDownloadSize) {
         this.bufferPool = bufferPool;
@@ -58,7 +60,8 @@ public abstract class LimitingStringReadChannelListener implements ChannelListen
 
     /**
      * @param bufferPool
-     * @param maxDownloadSize max bytes to read, -1 for no limit. The result varies for the buffer size, maximum read bytes are readLimit + buffer.size.
+     * @param maxDownloadSize max bytes to read, -1 for no limit. The result varies for the buffer size, maximum read
+     *        bytes are readLimit + buffer.size.
      */
     @Deprecated
     public LimitingStringReadChannelListener(final Pool<ByteBuffer> bufferPool, long maxDownloadSize) {
@@ -80,9 +83,9 @@ public abstract class LimitingStringReadChannelListener implements ChannelListen
                     stringDone(new StringResult(true, string.extract()));
                     IoUtils.safeClose(channel);
                 } else {
-                    ((Buffer)buffer).flip();
+                    ((Buffer) buffer).flip();
                     string.write(buffer);
-                    read +=r;
+                    read += r;
                     if (maxDownloadSize > -1L) {
                         if (read > maxDownloadSize) {
                             stringDone(new StringResult(false, string.extract()));
@@ -123,9 +126,9 @@ public abstract class LimitingStringReadChannelListener implements ChannelListen
                     stringDone(new StringResult(true, string.extract()));
                     IoUtils.safeClose(channel);
                 } else {
-                    ((Buffer)buffer).flip();
+                    ((Buffer) buffer).flip();
                     string.write(buffer);
-                    read +=r;
+                    read += r;
                     if (maxDownloadSize > -1L) {
                         if (read > maxDownloadSize) {
                             stringDone(new StringResult(false, string.extract()));

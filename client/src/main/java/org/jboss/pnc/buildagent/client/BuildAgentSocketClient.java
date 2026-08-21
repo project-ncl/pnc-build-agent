@@ -18,23 +18,6 @@
 
 package org.jboss.pnc.buildagent.client;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.jboss.pnc.buildagent.api.ResponseMode;
-import org.jboss.pnc.buildagent.api.TaskStatusUpdateEvent;
-import org.jboss.pnc.buildagent.api.httpinvoke.RetryConfig;
-import org.jboss.pnc.buildagent.common.http.HttpClient;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.websocket.ClientEndpointConfig;
-import javax.websocket.CloseReason;
-import javax.websocket.ContainerProvider;
-import javax.websocket.SendHandler;
-import javax.websocket.SendResult;
-import javax.websocket.Session;
-import javax.websocket.WebSocketContainer;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.BufferOverflowException;
@@ -51,6 +34,25 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
+
+import javax.websocket.ClientEndpointConfig;
+import javax.websocket.CloseReason;
+import javax.websocket.ContainerProvider;
+import javax.websocket.SendHandler;
+import javax.websocket.SendResult;
+import javax.websocket.Session;
+import javax.websocket.WebSocketContainer;
+
+import org.jboss.pnc.buildagent.api.ResponseMode;
+import org.jboss.pnc.buildagent.api.TaskStatusUpdateEvent;
+import org.jboss.pnc.buildagent.api.httpinvoke.RetryConfig;
+import org.jboss.pnc.buildagent.common.http.HttpClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * @see "https://github.com/undertow-io/undertow/blob/5bdddf327209a4abf18792e78148863686c26e9b/websockets-jsr/src/test/java/io/undertow/websockets/jsr/test/BinaryEndpointTest.java"
@@ -74,21 +76,24 @@ public class BuildAgentSocketClient extends BuildAgentClientBase implements Buil
     private AtomicBoolean closed = new AtomicBoolean(false);
 
     /**
-     * @see BuildAgentHttpClient(Optional<Consumer<String>>, Consumer<TaskStatusUpdateEvent>, SocketClientConfiguration )
+     * @see BuildAgentHttpClient(Optional<Consumer<String>>, Consumer<TaskStatusUpdateEvent>, SocketClientConfiguration
+     *      )
      */
-    public BuildAgentSocketClient(String termBaseUrl,
-                            Optional<Consumer<String>> responseDataConsumer,
-                            Consumer<TaskStatusUpdateEvent> onStatusUpdate,
-                            String commandContext
-                        ) throws TimeoutException, InterruptedException, BuildAgentClientException {
+    public BuildAgentSocketClient(
+            String termBaseUrl,
+            Optional<Consumer<String>> responseDataConsumer,
+            Consumer<TaskStatusUpdateEvent> onStatusUpdate,
+            String commandContext) throws TimeoutException, InterruptedException, BuildAgentClientException {
         this(termBaseUrl, responseDataConsumer, onStatusUpdate, commandContext, ResponseMode.BINARY, false);
     }
 
     /**
-     * @see BuildAgentHttpClient(Optional<Consumer<String>>, Consumer<TaskStatusUpdateEvent>, SocketClientConfiguration )
+     * @see BuildAgentHttpClient(Optional<Consumer<String>>, Consumer<TaskStatusUpdateEvent>, SocketClientConfiguration
+     *      )
      */
     @Deprecated
-    public BuildAgentSocketClient(String termBaseUrl,
+    public BuildAgentSocketClient(
+            String termBaseUrl,
             Optional<Consumer<String>> responseDataConsumer,
             Consumer<TaskStatusUpdateEvent> onStatusUpdate,
             String commandContext,
@@ -131,7 +136,8 @@ public class BuildAgentSocketClient extends BuildAgentClientBase implements Buil
     }
 
     /**
-     * It is preferable to use a single instance of a HttpClient for all the BuildAgentClients because of the HttpClient's
+     * It is preferable to use a single instance of a HttpClient for all the BuildAgentClients because of the
+     * HttpClient's
      * internal thread pool.
      */
     public BuildAgentSocketClient(
@@ -182,13 +188,13 @@ public class BuildAgentSocketClient extends BuildAgentClientBase implements Buil
     @Override
     public CompletableFuture<String> executeAsync(Object command) {
         return executeAsync(command, -1L, null)
-            .thenApply(r -> {
-                if (!r.isOK()) {
-                    throw new CompletionException("Websocket result is not OK.", r.getException());
-                } else {
-                    return null;
-                }
-            });
+                .thenApply(r -> {
+                    if (!r.isOK()) {
+                        throw new CompletionException("Websocket result is not OK.", r.getException());
+                    } else {
+                        return null;
+                    }
+                });
     }
 
     private CompletableFuture<SendResult> executeAsync(Object command, long sendTimeout, TimeUnit unit) {
@@ -227,7 +233,7 @@ public class BuildAgentSocketClient extends BuildAgentClientBase implements Buil
     @Override
     public CompletableFuture<HttpClient.Response> cancel(String sessionId) {
         return executeAsync('C' - 64)//send ctrl+C
-                .thenApply(s ->  new HttpClient.Response(204, null));
+                .thenApply(s -> new HttpClient.Response(204, null));
     }
 
     @Override
@@ -250,7 +256,7 @@ public class BuildAgentSocketClient extends BuildAgentClientBase implements Buil
             }
         } else {
             try {
-                byteBuffer = ByteBuffer.allocate(1).put(((Integer)command).byteValue());
+                byteBuffer = ByteBuffer.allocate(1).put(((Integer) command).byteValue());
             } catch (BufferOverflowException | ClassCastException e) {
                 throw new BuildAgentClientException("Invalid signal.", e);
             }
@@ -259,7 +265,9 @@ public class BuildAgentSocketClient extends BuildAgentClientBase implements Buil
         return byteBuffer;
     }
 
-    private RemoteEndpoint connectStatusListenerClient(String webSocketBaseUrl, Consumer<TaskStatusUpdateEvent> onStatusUpdate) {
+    private RemoteEndpoint connectStatusListenerClient(
+            String webSocketBaseUrl,
+            Consumer<TaskStatusUpdateEvent> onStatusUpdate) {
         RemoteEndpoint client = initializeDefault("statusListener");
         Consumer<String> responseConsumer = (text) -> {
             log.trace("Decoding response: {}", text);
@@ -269,10 +277,11 @@ public class BuildAgentSocketClient extends BuildAgentClientBase implements Buil
             try {
                 jsonObject = mapper.readTree(text);
             } catch (IOException e) {
-                log.error( "Cannot read JSON string: " + text, e);
+                log.error("Cannot read JSON string: " + text, e);
             }
             try {
-                TaskStatusUpdateEvent taskStatusUpdateEvent = mapper.treeToValue(jsonObject.get("event"), TaskStatusUpdateEvent.class);
+                TaskStatusUpdateEvent taskStatusUpdateEvent = mapper
+                        .treeToValue(jsonObject.get("event"), TaskStatusUpdateEvent.class);
                 onStatusUpdate.accept(taskStatusUpdateEvent);
             } catch (IOException e) {
                 log.error("Cannot deserialize TaskStatusUpdateEvent.", e);
@@ -281,7 +290,8 @@ public class BuildAgentSocketClient extends BuildAgentClientBase implements Buil
         client.onStringMessage(responseConsumer);
 
         try {
-            String websocketUrl = stripEndingSlash(webSocketBaseUrl) + RemoteEndpoint.WEB_SOCKET_LISTENER_PATH + commandContext;
+            String websocketUrl = stripEndingSlash(webSocketBaseUrl) + RemoteEndpoint.WEB_SOCKET_LISTENER_PATH
+                    + commandContext;
             ClientEndpointConfig clientEndpointConfig = ClientEndpointConfig.Builder.create().build();
             webSocketContainer.connectToServer(client, clientEndpointConfig, new URI(websocketUrl));
         } catch (Exception e) {
@@ -290,7 +300,9 @@ public class BuildAgentSocketClient extends BuildAgentClientBase implements Buil
         return client;
     }
 
-    private RemoteEndpoint connectCommandExecutingClient(String webSocketBaseUrl, Optional<Consumer<String>> responseDataConsumer) throws InterruptedException, TimeoutException {
+    private RemoteEndpoint connectCommandExecutingClient(
+            String webSocketBaseUrl,
+            Optional<Consumer<String>> responseDataConsumer) throws InterruptedException, TimeoutException {
 
         RemoteEndpoint client = initializeDefault("commandExecuting");
 
@@ -335,17 +347,21 @@ public class BuildAgentSocketClient extends BuildAgentClientBase implements Buil
         return path.replaceAll("/$", "");
     }
 
-    private void registerBinaryResponseConsumer(Optional<Consumer<String>> responseDataConsumer, RemoteEndpoint client) {
+    private void registerBinaryResponseConsumer(
+            Optional<Consumer<String>> responseDataConsumer,
+            RemoteEndpoint client) {
         Consumer<byte[]> responseConsumer = (bytes) -> {
             String responseData = new String(bytes, StandardCharsets.UTF_8);
-            responseDataConsumer.ifPresent((rdc) -> rdc.accept(responseData));;
+            responseDataConsumer.ifPresent((rdc) -> rdc.accept(responseData));
+            ;
         };
         client.onBinaryMessage(responseConsumer);
     }
 
     private void registerTextResponseConsumer(Optional<Consumer<String>> responseDataConsumer, RemoteEndpoint client) {
         Consumer<String> responseConsumer = (string) -> {
-                responseDataConsumer.ifPresent((rdc) -> rdc.accept(string));;
+            responseDataConsumer.ifPresent((rdc) -> rdc.accept(string));
+            ;
         };
         client.onStringMessage(responseConsumer);
     }
@@ -374,7 +390,7 @@ public class BuildAgentSocketClient extends BuildAgentClientBase implements Buil
 
     @Override
     public void close() throws IOException {
-        if(closed.compareAndSet(false, true)) {
+        if (closed.compareAndSet(false, true)) {
             try {
                 super.close();
                 commandExecutingEndpoint.close();

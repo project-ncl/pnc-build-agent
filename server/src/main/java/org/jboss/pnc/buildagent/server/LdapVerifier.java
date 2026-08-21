@@ -1,5 +1,10 @@
 package org.jboss.pnc.buildagent.server;
 
+import java.security.GeneralSecurityException;
+import java.util.logging.Logger;
+
+import javax.net.ssl.SSLSocketFactory;
+
 import com.unboundid.ldap.sdk.BindResult;
 import com.unboundid.ldap.sdk.Filter;
 import com.unboundid.ldap.sdk.LDAPConnection;
@@ -10,10 +15,6 @@ import com.unboundid.ldap.sdk.SearchResult;
 import com.unboundid.ldap.sdk.SearchScope;
 import com.unboundid.util.ssl.SSLUtil;
 
-import javax.net.ssl.SSLSocketFactory;
-import java.security.GeneralSecurityException;
-import java.util.logging.Logger;
-
 /**
  * Class to verify whether the ldap username and password is valid
  */
@@ -23,6 +24,7 @@ public class LdapVerifier {
 
     /**
      * Verify whether the username and password is valid, given the LDAP information
+     * 
      * @param hostLdapServer ldap server (assumes we are using ldaps)
      * @param portLdapServer ldap port (usually 636)
      * @param username username to verify

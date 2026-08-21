@@ -26,19 +26,19 @@ public class Options {
     private final BifrostUploaderOptions bifrostUploaderOptions;
 
     public Options(
-        String host,
-        int bindPort,
-        String bindPath,
-        boolean socketInvokerEnabled,
-        boolean httpInvokerEnabled,
-        int callbackMaxRetries,
-        long callbackWaitBeforeRetry,
-        BifrostUploaderOptions bifrostUploaderOptions,
-        String authHeaderConfigFile,
-        String keycloakClientConfigFile,
-        String ldapClientConfigFile,
-        int httpReadTimeout,
-        int httpWriteTimeout) {
+            String host,
+            int bindPort,
+            String bindPath,
+            boolean socketInvokerEnabled,
+            boolean httpInvokerEnabled,
+            int callbackMaxRetries,
+            long callbackWaitBeforeRetry,
+            BifrostUploaderOptions bifrostUploaderOptions,
+            String authHeaderConfigFile,
+            String keycloakClientConfigFile,
+            String ldapClientConfigFile,
+            int httpReadTimeout,
+            int httpWriteTimeout) {
         this.host = host;
         this.bindPath = bindPath;
         this.socketInvokerEnabled = socketInvokerEnabled;
