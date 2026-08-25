@@ -1,11 +1,12 @@
 package org.jboss.pnc.buildagent.server.httpinvoker;
 
+import java.io.IOException;
+import java.util.function.Consumer;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.util.function.Consumer;
 
 /**
  * @author <a href="mailto:matejonnet@gmail.com">Matej Lazar</a>

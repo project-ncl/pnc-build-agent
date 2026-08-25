@@ -1,9 +1,5 @@
 package org.jboss.pnc.buildagent.server;
 
-import io.jsonwebtoken.Jwts;
-import org.junit.Assert;
-import org.junit.Test;
-
 import java.security.Key;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -12,6 +8,11 @@ import java.time.temporal.ChronoUnit;
 import java.util.Base64;
 import java.util.Date;
 import java.util.UUID;
+
+import org.junit.Assert;
+import org.junit.Test;
+
+import io.jsonwebtoken.Jwts;
 
 public class OidcOfflineTokenVerifierTest {
 
@@ -56,7 +57,9 @@ public class OidcOfflineTokenVerifierTest {
                 .compact();
 
         // token expired, so this should fail
-        Assert.assertThrows(Exception.class, () -> OidcOfflineTokenVerifier.verify(jwtToken, textPublicKey(kp.getPublic()), authServerUrl));
+        Assert.assertThrows(
+                Exception.class,
+                () -> OidcOfflineTokenVerifier.verify(jwtToken, textPublicKey(kp.getPublic()), authServerUrl));
     }
 
     @Test
@@ -81,7 +84,9 @@ public class OidcOfflineTokenVerifierTest {
                 .compact();
 
         // use a completely different public key, this verification should fail
-        Assert.assertThrows(Exception.class, () -> OidcOfflineTokenVerifier.verify(jwtToken, textPublicKey(kpSecond.getPublic()), authServerUrl));
+        Assert.assertThrows(
+                Exception.class,
+                () -> OidcOfflineTokenVerifier.verify(jwtToken, textPublicKey(kpSecond.getPublic()), authServerUrl));
     }
 
     @Test
@@ -103,7 +108,9 @@ public class OidcOfflineTokenVerifierTest {
                 .compact();
 
         // all good, except with the wrong issuer
-        Assert.assertThrows(Exception.class, () -> OidcOfflineTokenVerifier.verify(jwtToken, textPublicKey(kp.getPublic()), "https://booya.com/no"));
+        Assert.assertThrows(
+                Exception.class,
+                () -> OidcOfflineTokenVerifier.verify(jwtToken, textPublicKey(kp.getPublic()), "https://booya.com/no"));
     }
 
     private KeyPair generateRSAKeyPair() throws Exception {

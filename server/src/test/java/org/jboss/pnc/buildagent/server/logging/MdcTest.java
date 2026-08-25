@@ -1,15 +1,15 @@
 package org.jboss.pnc.buildagent.server.logging;
 
-import org.junit.Assert;
-import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static org.jboss.pnc.buildagent.server.logging.Mdc.parseMdc;
 
 import java.time.Instant;
 import java.util.Map;
 import java.util.Optional;
 
-import static org.jboss.pnc.buildagent.server.logging.Mdc.parseMdc;
+import org.junit.Assert;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author <a href="mailto:matejonnet@gmail.com">Matej Lazar</a>

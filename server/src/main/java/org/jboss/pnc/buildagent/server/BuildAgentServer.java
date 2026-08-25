@@ -18,11 +18,6 @@
 
 package org.jboss.pnc.buildagent.server;
 
-import org.jboss.pnc.buildagent.common.BuildAgentException;
-import org.jboss.pnc.buildagent.server.termserver.Term;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -37,9 +32,14 @@ import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 
+import org.jboss.pnc.buildagent.common.BuildAgentException;
+import org.jboss.pnc.buildagent.server.termserver.Term;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * @author <a href="mailto:matejonnet@gmail.com">Matej Lazar</a>
-  */
+ */
 public class BuildAgentServer {
 
     private final Logger log = LoggerFactory.getLogger(BuildAgentServer.class);
@@ -61,6 +61,7 @@ public class BuildAgentServer {
         this.options = options;
         init(logPath, kafkaConfig, primaryLoggersArr, logMDC);
     }
+
     /**
      * Blocks the operation until the server is started.
      *
@@ -101,7 +102,12 @@ public class BuildAgentServer {
 
             try {
                 KafkaQueueAdapter kafkaQueueAdapter = new KafkaQueueAdapter(properties, queueTopic);
-                sinkChannels.add(new IoQueueLogger(kafkaQueueAdapter, isPrimary(primaryLoggers, IoLoggerName.KAFKA), flushTimeoutMillis, logMDC));
+                sinkChannels.add(
+                        new IoQueueLogger(
+                                kafkaQueueAdapter,
+                                isPrimary(primaryLoggers, IoLoggerName.KAFKA),
+                                flushTimeoutMillis,
+                                logMDC));
             } catch (InstantiationException | UnsupportedEncodingException e) {
                 throw new BuildAgentException("Cannot initialize Kafka logger.", e);
             }
@@ -111,8 +117,7 @@ public class BuildAgentServer {
             undertowBootstrap = new BootstrapUndertow(
                     executor,
                     sinkChannels,
-                    options
-            );
+                    options);
             log.info("Server started on " + options.getHost() + ":" + options.getPort());
         } catch (BuildAgentException e) {
             throw e;

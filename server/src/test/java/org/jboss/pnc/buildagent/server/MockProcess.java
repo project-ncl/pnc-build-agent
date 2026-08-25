@@ -32,7 +32,8 @@ public class MockProcess {
 
     /**
      *
-     * @param args 1: Number of repeats. 2: Delay in ms. 3: Message to print, where "long" is replaced with LONG_MESSAGE string.
+     * @param args 1: Number of repeats. 2: Delay in ms. 3: Message to print, where "long" is replaced with LONG_MESSAGE
+     *        string.
      * @throws InterruptedException
      */
     public static void main(String[] args) throws InterruptedException {
@@ -49,7 +50,7 @@ public class MockProcess {
         }
 
         String message;
-        if (args.length >= 3 ) {
+        if (args.length >= 3) {
             message = args[2];
             if (message.equals("long")) {
                 message = LONG_MESSAGE;
@@ -59,14 +60,17 @@ public class MockProcess {
         }
 
         System.out.println(WELCOME_MESSAGE);
-        System.out.println("I'll write to stdout test message '" + message + "' " + repeat + " times with " + delay + "ms delay.");
+        System.out.println(
+                "I'll write to stdout test message '" + message + "' " + repeat + " times with " + delay + "ms delay.");
         for (int i = 0; i < repeat; i++) {
             System.out.println(i + " : " + message);
             Thread.sleep(delay);
         }
         byte[] invalid = new byte[2];
-        invalid[0] = (byte)Integer.parseInt("80", 16);;
-        invalid[1] = (byte)Integer.parseInt("bf", 16);;
+        invalid[0] = (byte) Integer.parseInt("80", 16);
+        ;
+        invalid[1] = (byte) Integer.parseInt("bf", 16);
+        ;
         System.out.println("Writing invalid chars: " + new String(invalid, StandardCharsets.UTF_8));
         System.out.println(FINAL_MESSAGE);
     }

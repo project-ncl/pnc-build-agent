@@ -18,12 +18,13 @@
 
 package org.jboss.pnc.buildagent.server.termserver;
 
-import io.undertow.websockets.core.WebSocketChannel;
-import io.undertow.websockets.core.WebSockets;
-import org.jboss.pnc.buildagent.server.ReadOnlyChannel;
-
 import java.io.IOException;
 import java.nio.ByteBuffer;
+
+import org.jboss.pnc.buildagent.server.ReadOnlyChannel;
+
+import io.undertow.websockets.core.WebSocketChannel;
+import io.undertow.websockets.core.WebSockets;
 
 /**
  * @author <a href="mailto:matejonnet@gmail.com">Matej Lazar</a>

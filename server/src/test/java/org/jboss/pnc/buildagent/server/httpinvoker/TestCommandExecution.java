@@ -1,6 +1,22 @@
 package org.jboss.pnc.buildagent.server.httpinvoker;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
+
+import javax.servlet.ServletException;
+
 import org.jboss.pnc.api.dto.HeartbeatConfig;
 import org.jboss.pnc.api.dto.Request;
 import org.jboss.pnc.buildagent.api.Status;
@@ -17,21 +33,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.ServletException;
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Consumer;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * @author <a href="mailto:matejonnet@gmail.com">Matej Lazar</a>
@@ -60,7 +62,8 @@ public class TestCommandExecution {
         callbackServer = new HttpServer();
 
         Consumer<String> responseConsumer = (s) -> responseConsumers.forEach(rc -> rc.accept(s));
-        ResponseConsumerAddindServletFactory callbackHandlerFactory = new ResponseConsumerAddindServletFactory(responseConsumer);
+        ResponseConsumerAddindServletFactory callbackHandlerFactory = new ResponseConsumerAddindServletFactory(
+                responseConsumer);
         HeartbeatServletFactory heartbeatServletFactory = new HeartbeatServletFactory(heartbeatCounter);
         callbackServer.addServlet(CallbackHandler.class, Optional.of(callbackHandlerFactory));
         callbackServer.addServlet(HeartbeatHandler.class, Optional.of(heartbeatServletFactory));
@@ -82,9 +85,11 @@ public class TestCommandExecution {
         Consumer<String> onResult = (s) -> callbackFuture.complete(s);
         responseConsumers.add(onResult);
 
-        URI callbackUrl = new URI("http://" + HOST +":" + LOCAL_PORT+"/" + CallbackHandler.class.getSimpleName());
+        URI callbackUrl = new URI("http://" + HOST + ":" + LOCAL_PORT + "/" + CallbackHandler.class.getSimpleName());
         HeartbeatConfig heartbeatConfig = new HeartbeatConfig(
-                new Request(Request.Method.GET, new URI("http://" + HOST +":" + LOCAL_PORT+"/" + HeartbeatHandler.class.getSimpleName())),
+                new Request(
+                        Request.Method.GET,
+                        new URI("http://" + HOST + ":" + LOCAL_PORT + "/" + HeartbeatHandler.class.getSimpleName())),
                 50L,
                 TimeUnit.MILLISECONDS);
         HttpClientConfiguration clientConfiguration = HttpClientConfiguration.newBuilder()
@@ -115,7 +120,7 @@ public class TestCommandExecution {
         Consumer<String> onResult = (s) -> callbackFuture.complete(s);
         responseConsumers.add(onResult);
 
-        URL callbackUrl = new URL("http://" + HOST +":" + LOCAL_PORT+"/" + CallbackHandler.class.getSimpleName());
+        URL callbackUrl = new URL("http://" + HOST + ":" + LOCAL_PORT + "/" + CallbackHandler.class.getSimpleName());
         BuildAgentClient client = new BuildAgentHttpClient(terminalBaseUrl, callbackUrl, "PUT");
         client.execute(TEST_COMMAND_BASE + "4 250");
 

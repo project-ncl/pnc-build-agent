@@ -27,8 +27,8 @@ public class TestStringConversion {
 
     @Test
     public void convertBytesToString() {
-        byte[] bytes = {117, 32, 13};
-//        byte[] bytes = {117, 32, 10};
+        byte[] bytes = { 117, 32, 13 };
+        //        byte[] bytes = {117, 32, 10};
         System.out.println("Lets see the string: [" + new String(bytes) + "]");
     }
 }

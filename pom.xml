@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
@@ -19,15 +20,22 @@
   <licenses>
     <license>
       <name>Apache License, Version 2.0</name>
-      <distribution>repo</distribution>
       <url>http://www.apache.org/licenses/LICENSE-2.0.html</url>
+      <distribution>repo</distribution>
     </license>
   </licenses>
+
+  <modules>
+    <module>client</module>
+    <module>server</module>
+    <module>common</module>
+    <module>api</module>
+  </modules>
   <scm>
     <connection>scm:git:https://github.com/project-ncl/pnc-build-agent.git</connection>
     <developerConnection>scm:git:git@github.com:project-ncl/pnc-build-agent.git</developerConnection>
-    <url>https://github.com/project-ncl/pnc-build-agent/</url>
     <tag>HEAD</tag>
+    <url>https://github.com/project-ncl/pnc-build-agent/</url>
   </scm>
 
   <properties>
@@ -51,15 +59,11 @@
     <maven.compiler.target>1.8</maven.compiler.target>
     <maven.compiler.source>1.8</maven.compiler.source>
 
+    <version.spotless-maven-plugin>3.9.0</version.spotless-maven-plugin>
+    <version.pnc-ide-config>1.1.0</version.pnc-ide-config>
+
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
-
-  <modules>
-    <module>client</module>
-    <module>server</module>
-    <module>common</module>
-    <module>api</module>
-  </modules>
 
   <dependencyManagement>
     <dependencies>
@@ -76,8 +80,8 @@
       <dependency>
         <groupId>org.jboss.pnc.build-agent</groupId>
         <artifactId>client</artifactId>
-        <scope>test</scope>
         <version>${project.version}</version>
+        <scope>test</scope>
       </dependency>
       <dependency>
         <groupId>org.jboss.pnc</groupId>
@@ -304,6 +308,20 @@
     </dependencies>
   </dependencyManagement>
 
+  <repositories>
+    <repository>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+      <id>central-portal-snapshots</id>
+      <name>Central Portal Snapshots</name>
+      <url>https://central.sonatype.com/repository/maven-snapshots/</url>
+    </repository>
+  </repositories>
+
   <build>
     <pluginManagement>
       <plugins>
@@ -375,12 +393,8 @@
             <archive>
               <index>true</index>
               <manifest>
-                <addDefaultSpecificationEntries>
-                  true
-                </addDefaultSpecificationEntries>
-                <addDefaultImplementationEntries>
-                  true
-                </addDefaultImplementationEntries>
+                <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+                <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
               </manifest>
               <manifestEntries>
                 <Implementation-URL>${project.url}</Implementation-URL>
@@ -401,42 +415,80 @@
     </pluginManagement>
 
     <plugins>
-        <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-enforcer-plugin</artifactId>
-            <version>3.6.3</version> <!-- Use the latest stable version available -->
-            <executions>
-                <execution>
-                    <id>enforce-bytecode-version</id>
-                    <goals>
-                        <goal>enforce</goal>
-                    </goals>
-                    <configuration>
-                        <rules>
-                            <enforceBytecodeVersion>
-                                <maxJdkVersion>${maven.compiler.release}</maxJdkVersion>
-                                <!--
+      <plugin>
+        <groupId>com.diffplug.spotless</groupId>
+        <artifactId>spotless-maven-plugin</artifactId>
+        <version>${version.spotless-maven-plugin}</version>
+        <configuration>
+          <java>
+            <removeUnusedImports/>
+            <importOrder>
+              <file>java-import-order.txt</file>
+            </importOrder>
+            <eclipse>
+              <file>java-formatter.xml</file>
+            </eclipse>
+            <lineEndings>UNIX</lineEndings>
+          </java>
+          <pom>
+            <sortPom>
+              <expandEmptyElements>false</expandEmptyElements>
+            </sortPom>
+          </pom>
+        </configuration>
+        <dependencies>
+          <dependency>
+            <groupId>org.jboss.pnc</groupId>
+            <artifactId>ide-config</artifactId>
+            <version>${version.pnc-ide-config}</version>
+          </dependency>
+        </dependencies>
+        <executions>
+          <execution>
+            <goals>
+              <goal>apply</goal>
+            </goals>
+            <phase>compile</phase>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <version>3.6.3</version>
+        <dependencies>
+          <!-- This dependency adds the extra rules to the standard enforcer plugin -->
+          <dependency>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>extra-enforcer-rules</artifactId>
+            <version>1.9.0</version>
+          </dependency>
+        </dependencies>
+        <!-- Use the latest stable version available -->
+        <executions>
+          <execution>
+            <id>enforce-bytecode-version</id>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+            <configuration>
+              <rules>
+                <enforceBytecodeVersion>
+                  <maxJdkVersion>${maven.compiler.release}</maxJdkVersion>
+                  <!--
                                     keycloak (>= 26) EdDSA class compiled to Java 15 bytecode;
                                     never loaded on Java 8 (keycloak falls back at runtime)
                                 -->
-                                <ignoreClasses>
-                                    <ignoreClass>org.keycloak.jose.jwk.EdECUtilsImpl</ignoreClass>
-                                </ignoreClasses>
-                            </enforceBytecodeVersion>
-                        </rules>
-                        <fail>true</fail>
-                    </configuration>
-                </execution>
-            </executions>
-            <dependencies>
-                <!-- This dependency adds the extra rules to the standard enforcer plugin -->
-                <dependency>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>extra-enforcer-rules</artifactId>
-                    <version>1.9.0</version>
-                </dependency>
-            </dependencies>
-        </plugin>
+                  <ignoreClasses>
+                    <ignoreClass>org.keycloak.jose.jwk.EdECUtilsImpl</ignoreClass>
+                  </ignoreClasses>
+                </enforceBytecodeVersion>
+              </rules>
+              <fail>true</fail>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
       <plugin>
         <groupId>org.sonatype.central</groupId>
         <artifactId>central-publishing-maven-plugin</artifactId>
@@ -460,11 +512,11 @@
         <artifactId>buildnumber-maven-plugin</artifactId>
         <executions>
           <execution>
-            <phase>validate</phase>
             <id>buildnumber</id>
             <goals>
               <goal>create</goal>
             </goals>
+            <phase>validate</phase>
             <configuration>
               <shortRevisionLength>8</shortRevisionLength>
               <timestampFormat>{0,date,dd MMMM yyyy}</timestampFormat>
@@ -488,70 +540,56 @@
     </plugins>
   </build>
 
-  <repositories>
-    <repository>
-      <name>Central Portal Snapshots</name>
-      <id>central-portal-snapshots</id>
-      <url>https://central.sonatype.com/repository/maven-snapshots/</url>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-    </repository>
-  </repositories>
-
   <profiles>
     <profile>
       <id>release</id>
       <build>
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-source-plugin</artifactId>
-                <version>${version.source.plugin}</version>
-                <executions>
-                    <execution>
-                        <id>attach-sources</id>
-                        <goals>
-                            <goal>jar-no-fork</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <version>${version.javadoc.plugin}</version>
-                <executions>
-                    <execution>
-                        <id>attach-javadocs</id>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                        <configuration>
-                            <detectOfflineLinks>false</detectOfflineLinks>
-                            <quiet>true</quiet>
-                            <doclint>none</doclint>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-gpg-plugin</artifactId>
-                <version>3.2.8</version>
-                <executions>
-                    <execution>
-                        <id>sign-artifacts</id>
-                        <phase>verify</phase>
-                        <goals>
-                            <goal>sign</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-source-plugin</artifactId>
+            <version>${version.source.plugin}</version>
+            <executions>
+              <execution>
+                <id>attach-sources</id>
+                <goals>
+                  <goal>jar-no-fork</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-javadoc-plugin</artifactId>
+            <version>${version.javadoc.plugin}</version>
+            <executions>
+              <execution>
+                <id>attach-javadocs</id>
+                <goals>
+                  <goal>jar</goal>
+                </goals>
+                <configuration>
+                  <detectOfflineLinks>false</detectOfflineLinks>
+                  <quiet>true</quiet>
+                  <doclint>none</doclint>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-gpg-plugin</artifactId>
+            <version>3.2.8</version>
+            <executions>
+              <execution>
+                <id>sign-artifacts</id>
+                <goals>
+                  <goal>sign</goal>
+                </goals>
+                <phase>verify</phase>
+              </execution>
+            </executions>
+          </plugin>
         </plugins>
       </build>
     </profile>

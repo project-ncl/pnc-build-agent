@@ -18,7 +18,6 @@
 
 package org.jboss.pnc.buildagent.server.termserver;
 
-
 import org.jboss.pnc.buildagent.api.Status;
 
 /**

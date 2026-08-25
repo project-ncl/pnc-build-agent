@@ -1,10 +1,5 @@
 package org.jboss.pnc.buildagent.server.logging.formatters.jboss;
 
-import org.jboss.logmanager.LogContext;
-import org.jboss.logmanager.LogManager;
-import org.jboss.logmanager.PropertyConfigurator;
-import org.jboss.pnc.buildagent.api.logging.LogFormatter;
-
 import java.io.IOException;
 import java.util.Properties;
 import java.util.logging.Formatter;
@@ -12,6 +7,11 @@ import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
+
+import org.jboss.logmanager.LogContext;
+import org.jboss.logmanager.LogManager;
+import org.jboss.logmanager.PropertyConfigurator;
+import org.jboss.pnc.buildagent.api.logging.LogFormatter;
 
 /**
  * @author <a href="mailto:matejonnet@gmail.com">Matej Lazar</a>
@@ -25,7 +25,9 @@ public class JBossFormatter implements LogFormatter {
         try {
             logManager = (LogManager) LogManager.getLogManager();
         } catch (ClassCastException e) {
-            throw new InstantiationException("Make sure the system property '-Djava.util.logging.manager=org.jboss.logmanager.LogManager' is set: " + e.getMessage());
+            throw new InstantiationException(
+                    "Make sure the system property '-Djava.util.logging.manager=org.jboss.logmanager.LogManager' is set: "
+                            + e.getMessage());
         }
 
         Logger rootLogger = logManager.getLogger("");
@@ -54,7 +56,8 @@ public class JBossFormatter implements LogFormatter {
             }
         }
         if (formatter == null) {
-            throw new InstantiationException("Missing JsonFormatter configuration. Add 'handler.FORMATTER_REF=org.jboss.pnc.buildagent.server.logging.formatters.jboss.FormatterReference' with a reference to the formatter.");
+            throw new InstantiationException(
+                    "Missing JsonFormatter configuration. Add 'handler.FORMATTER_REF=org.jboss.pnc.buildagent.server.logging.formatters.jboss.FormatterReference' with a reference to the formatter.");
         }
     }
 

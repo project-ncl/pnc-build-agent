@@ -18,24 +18,35 @@
 
 package org.jboss.pnc.buildagent.server;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.undertow.Handlers;
-import io.undertow.Undertow;
-import io.undertow.server.HttpHandler;
-import io.undertow.server.HttpServerExchange;
-import io.undertow.server.handlers.PathHandler;
-import io.undertow.server.handlers.ResponseCodeHandler;
-import io.undertow.servlet.Servlets;
-import io.undertow.servlet.api.DeploymentInfo;
-import io.undertow.servlet.api.DeploymentManager;
-import io.undertow.servlet.api.FilterInfo;
+import static io.undertow.servlet.Servlets.defaultContainer;
+import static io.undertow.servlet.Servlets.deployment;
+import static io.undertow.servlet.Servlets.servlet;
+import static org.jboss.pnc.buildagent.api.Constants.HTTP_INVOKER_PATH;
+import static org.jboss.pnc.buildagent.api.Constants.RUNNING_PROCESSES;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.jar.Manifest;
+
+import javax.servlet.DispatcherType;
+import javax.servlet.Filter;
+import javax.servlet.ServletException;
+
 import org.jboss.pnc.buildagent.api.Constants;
 import org.jboss.pnc.buildagent.api.ResponseMode;
 import org.jboss.pnc.buildagent.api.httpinvoke.RetryConfig;
 import org.jboss.pnc.buildagent.common.BuildAgentException;
+import org.jboss.pnc.buildagent.common.StringUtils;
 import org.jboss.pnc.buildagent.common.http.HeartbeatHttpHeaderProvider;
-import org.jboss.pnc.buildagent.common.http.HttpClient;
 import org.jboss.pnc.buildagent.common.http.HeartbeatSender;
+import org.jboss.pnc.buildagent.common.http.HttpClient;
 import org.jboss.pnc.buildagent.common.security.KeycloakClient;
 import org.jboss.pnc.buildagent.common.security.KeycloakClientConfiguration;
 import org.jboss.pnc.buildagent.common.security.KeycloakClientConfigurationException;
@@ -48,29 +59,21 @@ import org.jboss.pnc.buildagent.server.servlet.Upload;
 import org.jboss.pnc.buildagent.server.servlet.Welcome;
 import org.jboss.pnc.buildagent.server.termserver.GeneralHeartbeatHttpHeaderProvider;
 import org.jboss.pnc.buildagent.server.termserver.Term;
-import org.jboss.pnc.buildagent.common.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.DispatcherType;
-import javax.servlet.Filter;
-import javax.servlet.ServletException;
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.jar.Manifest;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
-import static io.undertow.servlet.Servlets.defaultContainer;
-import static io.undertow.servlet.Servlets.deployment;
-import static io.undertow.servlet.Servlets.servlet;
-import static org.jboss.pnc.buildagent.api.Constants.HTTP_INVOKER_PATH;
-import static org.jboss.pnc.buildagent.api.Constants.RUNNING_PROCESSES;
+import io.undertow.Handlers;
+import io.undertow.Undertow;
+import io.undertow.server.HttpHandler;
+import io.undertow.server.HttpServerExchange;
+import io.undertow.server.handlers.PathHandler;
+import io.undertow.server.handlers.ResponseCodeHandler;
+import io.undertow.servlet.Servlets;
+import io.undertow.servlet.api.DeploymentInfo;
+import io.undertow.servlet.api.DeploymentManager;
+import io.undertow.servlet.api.FilterInfo;
 
 /**
  * @author <a href="mailto:matejonnet@gmail.com">Matej Lazar</a>
@@ -133,8 +136,9 @@ public class BootstrapUndertow {
             if (!options.getKeycloakClientConfigFile().isEmpty()) {
                 try {
                     log.info("Reading keycloak client config from file: {}", options.getKeycloakClientConfigFile());
-                    keycloakClient = new KeycloakClient(KeycloakClientConfiguration.parseJson(
-                            new File(options.getKeycloakClientConfigFile())));
+                    keycloakClient = new KeycloakClient(
+                            KeycloakClientConfiguration.parseJson(
+                                    new File(options.getKeycloakClientConfigFile())));
                 } catch (KeycloakClientConfigurationException e) {
                     throw new BuildAgentException("Cannot read the Keycloak client configuration file", e);
                 }
@@ -144,22 +148,26 @@ public class BootstrapUndertow {
                 ldapClient = new LdapClient(options.getLdapClientConfigFile());
             }
 
-            HeartbeatHttpHeaderProvider heartbeatHttpHeaderProvider = new GeneralHeartbeatHttpHeaderProvider(keycloakClient, ldapClient);
+            HeartbeatHttpHeaderProvider heartbeatHttpHeaderProvider = new GeneralHeartbeatHttpHeaderProvider(
+                    keycloakClient,
+                    ldapClient);
             RetryConfig retryConfig = new RetryConfig(
                     options.getCallbackMaxRetries(),
                     options.getCallbackWaitBeforeRetry());
             servletBuilder.addServlet(
-                    servlet("HttpInvoker",
+                    servlet(
+                            "HttpInvoker",
                             HttpInvoker.class,
-                            new HttpInvokerFactory(readOnlyChannels,
+                            new HttpInvokerFactory(
+                                    readOnlyChannels,
                                     httpClient,
                                     new SessionRegistry(),
                                     retryConfig,
                                     new HeartbeatSender(httpClient, heartbeatHttpHeaderProvider),
                                     options.getBifrostUploaderOptions(),
                                     keycloakClient,
-                                    ldapClient)
-                    ).addMapping(HTTP_INVOKER_PATH + "/*"));
+                                    ldapClient))
+                            .addMapping(HTTP_INVOKER_PATH + "/*"));
             configureAuthentication(options, servletBuilder, HTTP_INVOKER_PATH + "/*");
         }
 
@@ -244,7 +252,11 @@ public class BootstrapUndertow {
         if (invokerContext.toLowerCase().endsWith("/ro")) {
             invokerContext = invokerContext.substring(0, invokerContext.length() - 3);
         }
-        log.debug("Computed invokerContext [{}] from requestPath [{}] and termPath [{}]", invokerContext, requestPath, termPath);
+        log.debug(
+                "Computed invokerContext [{}] from requestPath [{}] and termPath [{}]",
+                invokerContext,
+                requestPath,
+                termPath);
 
         boolean isReadOnly = requestPath.toLowerCase().endsWith("ro");
         Term term = getTerm(invokerContext, readOnlyChannels);
@@ -321,7 +333,7 @@ public class BootstrapUndertow {
                 }
             }
         } catch (final IOException e) {
-            log.trace( "Error retrieving information from manifest", e);
+            log.trace("Error retrieving information from manifest", e);
         }
 
         return result;

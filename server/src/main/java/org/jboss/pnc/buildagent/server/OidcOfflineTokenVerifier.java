@@ -1,15 +1,15 @@
 package org.jboss.pnc.buildagent.server;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jws;
-import io.jsonwebtoken.Jwts;
-
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
+
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jws;
+import io.jsonwebtoken.Jwts;
 
 public class OidcOfflineTokenVerifier {
 
@@ -18,9 +18,10 @@ public class OidcOfflineTokenVerifier {
      * If the JWT token has expired, the verification will fail.
      * If the verification fails, an exception is thrown.
      *
-     * @param jwtString     token to verify
-     * @param publicKey     public key of auth issuer: from {auth url}/auth/realms/{realm}
-     * @param authServerUrl auth-server-url in format: {auth url/auth/realms/realm} for keycloak. Used to verify source of token matches the one we want
+     * @param jwtString token to verify
+     * @param publicKey public key of auth issuer: from {auth url}/auth/realms/{realm}
+     * @param authServerUrl auth-server-url in format: {auth url/auth/realms/realm} for keycloak. Used to verify source
+     *        of token matches the one we want
      * @throws Exception if verification fails
      */
     public static void verify(String jwtString, String publicKey, String authServerUrl) throws Exception {
@@ -32,11 +33,13 @@ public class OidcOfflineTokenVerifier {
         String tokenIssuer = jws.getPayload().getIssuer();
 
         if (!tokenIssuer.equals(authServerUrl)) {
-            throw new RuntimeException("Token issuer " + tokenIssuer + " doesn't match with the configured issuer: " + authServerUrl);
+            throw new RuntimeException(
+                    "Token issuer " + tokenIssuer + " doesn't match with the configured issuer: " + authServerUrl);
         }
     }
 
-    private static Jws<Claims> parseJwt(String jwtString, String publicKey) throws InvalidKeySpecException, NoSuchAlgorithmException {
+    private static Jws<Claims> parseJwt(String jwtString, String publicKey)
+            throws InvalidKeySpecException, NoSuchAlgorithmException {
 
         PublicKey publicKeyObj = getPublicKeyObject(publicKey);
 
@@ -46,7 +49,8 @@ public class OidcOfflineTokenVerifier {
                 .parseSignedClaims(jwtString);
     }
 
-    private static PublicKey getPublicKeyObject(String publicKey) throws NoSuchAlgorithmException, InvalidKeySpecException {
+    private static PublicKey getPublicKeyObject(String publicKey)
+            throws NoSuchAlgorithmException, InvalidKeySpecException {
         String rsaPublicKey = "-----BEGIN PUBLIC KEY-----" + publicKey + "-----END PUBLIC KEY-----";
         rsaPublicKey = rsaPublicKey.replace("-----BEGIN PUBLIC KEY-----", "");
         rsaPublicKey = rsaPublicKey.replace("-----END PUBLIC KEY-----", "");

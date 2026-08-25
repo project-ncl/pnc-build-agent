@@ -1,13 +1,13 @@
 package org.jboss.pnc.buildagent.client;
 
-import org.jboss.pnc.buildagent.common.http.HttpClient;
-
 import java.io.Closeable;
 import java.nio.ByteBuffer;
 import java.nio.file.Path;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+
+import org.jboss.pnc.buildagent.common.http.HttpClient;
 
 /**
  * @author <a href="mailto:matejonnet@gmail.com">Matej Lazar</a>
