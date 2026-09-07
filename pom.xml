@@ -59,7 +59,7 @@
     <maven.compiler.target>1.8</maven.compiler.target>
     <maven.compiler.source>1.8</maven.compiler.source>
 
-    <version.spotless-maven-plugin>3.10.0</version.spotless-maven-plugin>
+    <version.spotless-maven-plugin>3.10.1</version.spotless-maven-plugin>
     <version.pnc-ide-config>1.1.0</version.pnc-ide-config>
 
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
