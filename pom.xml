@@ -414,6 +414,11 @@
         <artifactId>spotless-maven-plugin</artifactId>
         <version>${version.spotless-maven-plugin}</version>
         <configuration>
+          <pom>
+            <sortPom>
+              <expandEmptyElements>false</expandEmptyElements>
+            </sortPom>
+          </pom>
           <java>
             <removeUnusedImports/>
             <importOrder>
@@ -424,11 +429,6 @@
             </eclipse>
             <lineEndings>UNIX</lineEndings>
           </java>
-          <pom>
-            <sortPom>
-              <expandEmptyElements>false</expandEmptyElements>
-            </sortPom>
-          </pom>
         </configuration>
         <dependencies>
           <dependency>
